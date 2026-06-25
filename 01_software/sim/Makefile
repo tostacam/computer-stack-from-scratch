@@ -19,5 +19,12 @@ test_adders:
 test_mux:
 	$(CC) $(CFLAGS) tests/test_mux.c $(LOGIC_SRCS) $(CIRCUITS_SRCS) -o tests/test_mux
 
+test_bitwise:
+	$(CC) $(CFLAGS) tests/test_bitwise.c $(LOGIC_SRCS) $(CIRCUITS_SRCS) -o tests/test_bitwise
+
+test_shifters:
+	$(CC) $(CFLAGS) tests/test_shifters.c $(LOGIC_SRCS) $(CIRCUITS_SRCS) -o tests/test_shifters
+
 clean:
-	rm -f tests/test_nand tests/test_gates tests/test_bus tests/test_adders tests/test_mux
+	rm -f tests/test_nand tests/test_gates tests/test_bus tests/test_adders tests/test_mux \
+		tests/test_bitwise tests/test_shifters
