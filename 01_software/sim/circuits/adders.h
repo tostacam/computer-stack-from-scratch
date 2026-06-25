@@ -19,10 +19,10 @@ typedef struct {
 FullAdder full_adder(bit a, bit b, bit cin);
 
 typedef struct {
-  bus64 sum;
+  bus64 bus64_sum;
   bit carry_out;
 } add64_result;
 
-add64_result add64(64BitAdder a, 64BitAdder b, bit cin);
+add64_result add64(bus64 a, bus64 b, bit cin);
 
 #endif

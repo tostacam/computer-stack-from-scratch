@@ -13,7 +13,8 @@ FullAdder full_adder(bit a, bit b, bit cin) {
  
   FullAdder f;
   f.sum = h2.sum;
-  f.carry_out = OR(h1.carry, h2.carry);
+  f.carry_out = OR(h1.carry_out, h2.carry_out);
+  return f;
 }
 
 add64_result add64(bus64 a, bus64 b, bit cin) {
@@ -26,10 +27,11 @@ add64_result add64(bus64 a, bus64 b, bit cin) {
     bit b_i = bus64_getbit(b, i);
   
     f = full_adder(a_i, b_i, next_carry);
-    bus64_set(&r, i, f.sum);
+    bus64_setbit(&r.bus64_sum, i, f.sum);
     
     next_carry = f.carry_out;
   }
-
   r.carry_out = next_carry;
+
+  return r;
 }
