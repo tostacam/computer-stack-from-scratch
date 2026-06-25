@@ -9,8 +9,9 @@ typedef struct {
   bit data[BUS64_WIDTH];
 } bus64;
 
-bus64 bus64_zero();
-bit bus64_getbit(bus64 b, int i);
 void bus64_setbit(bus64 *b, int i, bit v);
+bit bus64_getbit(bus64 b, int i);
+bus64 bus64_zero();
+bus64 bus64_ones();
 
 #endif
