@@ -7,27 +7,26 @@
 #include "multiplexers.h"
 #include "bitwise.h"
 #include "shifters.h"
-
-#define CONTROL_BITS  4
-#define OUTPUT_FLAGS  4
+#include "comparators.h"
+#include "decoder.h"
 
 enum alu_op {
-  ADD,
-  SUB,
-  NOT,
-  AND,
-  OR,
-  XOR,
-  SHL,
-  SHR
+  ALU_OP_ADD,
+  ALU_OP_SUB,
+  ALU_OP_NOT,
+  ALU_OP_AND,
+  ALU_OP_OR,
+  ALU_OP_XOR,
+  ALU_OP_SHL,
+  ALU_OP_SHR
 };
 
 typedef struct {
   bus64 output;
-  bit  zero;
-  bit carry;
-  bit overflow;
-  bit negative;
+  bit   zero;
+  bit   carry;
+  bit   overflow;
+  bit   negative;
 } alu_result;
 
 alu_result alu_execute(bus64 a, bus64 b, enum alu_op op);
