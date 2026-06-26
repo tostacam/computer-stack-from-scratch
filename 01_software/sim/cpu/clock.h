@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 typedef struct {
-  uint64_t cycles;
+  uint64_t cycle;
 } clock;
 
 void clock_init(clock *c);
