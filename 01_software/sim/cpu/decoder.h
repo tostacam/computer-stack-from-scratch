@@ -1,8 +1,9 @@
 #ifndef DECODER_H
 #define DECODER_H
 
+#include <stdint.h>
 #include "bus.h"
 
-unsigned int decode_amount(bus64 b);
+uint64_t decode_amount(bus64 b);
 
 #endif
