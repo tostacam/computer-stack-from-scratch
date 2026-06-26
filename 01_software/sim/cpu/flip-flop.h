@@ -8,7 +8,9 @@ typedef struct {
   bit Q;
 } d_flip_flop;
 
-void flip_flop_init(d_flip_flop *ff);
+d_flip_flop flip_flop_init();
+void flip_flop_input(d_flip_flop *ff, bit input);
 void flip_flop_trigger(d_flip_flop *ff);
+bit flip_flop_output(d_flip_flop *ff);
 
 #endif
