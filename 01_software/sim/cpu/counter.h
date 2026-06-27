@@ -6,9 +6,8 @@
 
 typedef struct {
   bus64       count_in;
-  bit         load;
   bit         clear;
-  bit         increment;
+  bit         load;
   register64  output_reg;
 } counter64;
 
