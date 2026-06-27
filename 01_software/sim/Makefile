@@ -1,10 +1,11 @@
 CC = clang
-CFLAGS = -Wall -Wextra -Ilogic -Icircuits -Icpu -Itests
+CFLAGS = -Wall -Wextra -Ilogic -Icircuits -Icpu -Itests -Imemory
 
 LOGIC_SRCS = logic/*.c
 CIRCUITS_SRCS = circuits/*.c
 CPU_SRCS = cpu/*.c
 TEST_UTIL = tests/utilities.c
+MEM_SRCS = memory/*.c
 
 test_nand:
 	$(CC) $(CFLAGS) tests/test_nand.c $(LOGIC_SRCS) -o tests/test_nand
@@ -51,8 +52,11 @@ test_program_counter:
 test_register_file:
 	$(CC) $(CFLAGS) tests/test_register_file.c $(LOGIC_SRCS) $(CIRCUITS_SRCS) $(CPU_SRCS) $(TEST_UTIL) -o tests/test_register_file
 
+test_ram:
+	$(CC) $(CFLAGS) tests/test_ram.c $(LOGIC_SRCS) $(CIRCUITS_SRCS) $(CPU_SRCS) $(TEST_UTIL) $(MEM_SRCS) -o tests/test_ram
+
 clean:
 	rm -f tests/test_nand tests/test_gates tests/test_bus tests/test_adders tests/test_mux \
 		tests/test_bitwise tests/test_shifters tests/test_comparators tests/test_dec_enc \
 		tests/test_alu tests/test_flip_flop tests/test_register tests/test_counter tests/test_program_counter \
-		tests/test_register_file
+		tests/test_register_file tests/test_ram
