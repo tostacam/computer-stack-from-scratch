@@ -48,7 +48,11 @@ test_counter:
 test_program_counter:
 	$(CC) $(CFLAGS) tests/test_program_counter.c $(LOGIC_SRCS) $(CIRCUITS_SRCS) $(CPU_SRCS) $(TEST_UTIL) -o tests/test_program_counter
 
+test_register_file:
+	$(CC) $(CFLAGS) tests/test_register_file.c $(LOGIC_SRCS) $(CIRCUITS_SRCS) $(CPU_SRCS) $(TEST_UTIL) -o tests/test_register_file
+
 clean:
 	rm -f tests/test_nand tests/test_gates tests/test_bus tests/test_adders tests/test_mux \
 		tests/test_bitwise tests/test_shifters tests/test_comparators tests/test_dec_enc \
-		tests/test_alu tests/test_flip_flop tests/test_register tests/test_counter tests/test_program_counter
+		tests/test_alu tests/test_flip_flop tests/test_register tests/test_counter tests/test_program_counter \
+		tests/test_register_file
