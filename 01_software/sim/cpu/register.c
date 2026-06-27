@@ -5,7 +5,7 @@ register64 register64_init() {
   for (int i = 0; i < BUS64_WIDTH; ++i) {
     r.ff[i] = flip_flop_init();
   }
-  r.load = 0;
+  r.enable = 0;
   return r;
 }
 
@@ -16,16 +16,16 @@ void register64_input(register64 *r, bus64 input) {
 }
 
 void register64_enable(register64 *r) {
-  r->load = 1;
+  r->enable = 1;
 }
 
 void register64_disable(register64 *r) {
-  r->load = 0;
+  r->enable = 0;
 }
 
 void register64_trigger(register64 *r) {
   for (int i = 0; i < BUS64_WIDTH; ++i) {
-    if (r->load == 1) {
+    if (r->enable == 1) {
       flip_flop_trigger(&(r->ff[i]));
     }
   }

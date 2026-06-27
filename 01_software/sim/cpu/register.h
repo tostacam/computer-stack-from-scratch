@@ -7,7 +7,7 @@
 
 typedef struct {
   d_flip_flop ff[64];
-  bit         load;
+  bit         enable;
 } register64;
 
 register64 register64_init();
