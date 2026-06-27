@@ -1,6 +1,5 @@
 #include <assert.h>
-#include "decoder.h"
-#include "utilities.h"
+#include "decoder_encoder.h"
 
 void test_decode_amount() {
   uint64_t init, final;

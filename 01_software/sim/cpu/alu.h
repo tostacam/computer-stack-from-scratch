@@ -8,7 +8,7 @@
 #include "bitwise.h"
 #include "shifters.h"
 #include "comparators.h"
-#include "decoder.h"
+#include "decoder_encoder.h"
 
 enum alu_op {
   ALU_OP_ADD,
