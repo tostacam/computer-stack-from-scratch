@@ -2,9 +2,6 @@
 #include "register_file.h"
 #include "decoder_encoder.h"
 #include "utilities.h"
-
-
-
 #include <stdio.h>
 
 void test_register_file() {
