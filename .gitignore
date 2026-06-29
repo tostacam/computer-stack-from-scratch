@@ -1,0 +1,16 @@
+# Vivado (files + folders)
+*.jou
+*.log
+*.pb
+*.wdb
+*.backup.*
+*.vcd
+*.vcdf
+xsim.dir/
+*.cache/
+*.runs/
+*.hw/
+*.ip_user_files/
+
+# OS
+.DS_Store
