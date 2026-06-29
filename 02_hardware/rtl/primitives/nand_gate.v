@@ -1,8 +1,8 @@
-module nand_gate(a, b, out);
-
-  input   a;
-  input   b;
-  output  out;
+module nand_gate(
+  input   a, 
+  input   b, 
+  output  out
+);
 
   // NAND is the most fundamental gate, however HDL 
   // already has a native nand() function, just 

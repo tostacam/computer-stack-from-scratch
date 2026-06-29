@@ -1,45 +1,49 @@
 // 
 
-module not_gate(a, out);
-
-  input a;
-  output out;
+module not_gate(
+  input   a, 
+  output  out
+);
 
   assign out = ~a;
 
 endmodule
 
-module and_gate(a, b, out);
-
-  input a, b;
-  output out;
+module and_gate(
+  input   a, 
+  input   b, 
+  output  out
+);
 
   assign out = a & b;
 
 endmodule
 
-module or_gate(a, b, out);
-
-  input a, b;
-  output out;
+module or_gate(
+  input   a, 
+  input   b, 
+  output  out
+);
 
   assign out = a | b;
 
 endmodule
 
-module nor_gate(a, b, out);
-
-  input a, b;
-  output out;
+module nor_gate(
+  input   a, 
+  input   b, 
+  output  out
+);
 
   assign out = ~(a | b);
 
 endmodule
 
-module xor_gate(a, b, out);
-
-  input a, b;
-  output out;
+module xor_gate(
+  input   a, 
+  input   b, 
+  output  out
+);
 
   assign out = (a & ~b) | (~a & b);
 
