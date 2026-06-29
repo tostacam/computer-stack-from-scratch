@@ -25,6 +25,7 @@ module tb_nand;
     a = 1; b = 1; #1
     if (out !== 1'b0) $fatal;
 
+    $display("PASS: NAND TEST COMPLETED");
   end
 
 endmodule
