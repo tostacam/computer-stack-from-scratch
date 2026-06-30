@@ -35,7 +35,7 @@ test_dec_enc:
 	$(CC) $(CFLAGS) tests/test_dec_enc.c $(LOGIC_SRCS) $(CIRCUITS_SRCS) $(CPU_SRCS) $(TEST_UTIL) -o tests/test_dec_enc
 
 test_alu:
-	$(CC) $(CFLAGS) tests/test_alu.c $(LOGIC_SRCS) $(CIRCUITS_SRCS) $(CPU_SRCS) $(TEST_UTIL) -o tests/test_alu
+	$(CC) $(CFLAGS) tests/test_alu.c $(LOGIC_SRCS) $(CIRCUITS_SRCS) $(CPU_SRCS) $(TEST_UTIL) $(MEM_SRCS) -o tests/test_alu
 
 test_flip_flop:
 	$(CC) $(CFLAGS) tests/test_flip_flop.c $(LOGIC_SRCS) $(CIRCUITS_SRCS) $(CPU_SRCS)  -o tests/test_flip_flop

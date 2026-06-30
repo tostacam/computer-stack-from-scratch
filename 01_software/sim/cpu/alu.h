@@ -11,6 +11,7 @@
 #include "decoder_encoder.h"
 
 enum alu_op {
+  ALU_OP_NOP,
   ALU_OP_ADD,
   ALU_OP_SUB,
   ALU_OP_NOT,
@@ -22,13 +23,20 @@ enum alu_op {
 };
 
 typedef struct {
-  bus64 output;
-  bit   zero;
-  bit   carry;
-  bit   overflow;
-  bit   negative;
-} alu_result;
+  // input
+  bus64       a;
+  bus64       b;
+  enum alu_op opcode;
 
-alu_result alu_execute(bus64 a, bus64 b, enum alu_op op);
+  // output
+  bus64 output;
+  bit   f_zero; 
+  bit   f_carry;
+  bit   f_overflow;
+  bit   f_negative;
+} ALU;
+
+void alu_init(ALU *alu);
+void alu_tick(ALU *alu);
 
 #endif
