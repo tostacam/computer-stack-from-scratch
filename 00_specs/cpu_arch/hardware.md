@@ -17,7 +17,6 @@
 
 - Result `[63:0]`
 - Zero
-- Negative
 
 ## Current ALU Operations
 
