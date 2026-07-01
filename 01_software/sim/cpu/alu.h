@@ -11,15 +11,21 @@
 #include "decoder_encoder.h"
 
 enum alu_op {
-  ALU_OP_NOP,
   ALU_OP_ADD,
   ALU_OP_SUB,
-  ALU_OP_NOT,
+
   ALU_OP_AND,
   ALU_OP_OR,
   ALU_OP_XOR,
-  ALU_OP_SHL,
-  ALU_OP_SHR
+
+  ALU_OP_SLL,
+  ALU_OP_SRL,
+  ALU_OP_SRA,
+
+  ALU_OP_SLT,
+  ALU_OP_SLTU,
+  
+  ALU_OP_PASS_B
 };
 
 typedef struct {
