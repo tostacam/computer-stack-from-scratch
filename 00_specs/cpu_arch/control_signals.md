@@ -3,7 +3,7 @@
 ## Control Signal Effecs When Deasserted/Asserted
 
 | Signal | Deasserted | Asserted |
-|---------|------:|-------------|
+|---------|------|-------------|
 | RegWrite | None. | Write register input is writen with the value on the write data input. |
 | ALUSrc | Second ALU operand comes from the second register fiel output (rd2). | Second ALU operand is the 12bits of the immediate instruction |
 | PCSrc/Branch | PC is replaced by the output of the adder that computes the value of PC+4 | The PC is replaced by the output of the adder that computes the branch target. |
