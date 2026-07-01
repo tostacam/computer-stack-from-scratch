@@ -19,3 +19,13 @@ bus64 encode_amount(uint64_t n) {
   }
   return r;
 }
+
+uint64_t decode_nbits(bus64 a, int start, int end) {
+  uint64_t r = 0;
+  for (int i = start, j = 0; i <= end; ++i, ++j) {
+    if(bus64_getbit(a, i) == 1) {
+      r |= (1ULL << j);
+    }
+  }
+  return r;
+}

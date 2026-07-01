@@ -32,7 +32,7 @@ test_comparators:
 	$(CC) $(CFLAGS) tests/test_comparators.c $(LOGIC_SRCS) $(CIRCUITS_SRCS) -o tests/test_comparators
 
 test_dec_enc:
-	$(CC) $(CFLAGS) tests/test_dec_enc.c $(LOGIC_SRCS) $(CIRCUITS_SRCS) $(CPU_SRCS) $(TEST_UTIL) -o tests/test_dec_enc
+	$(CC) $(CFLAGS) tests/test_dec_enc.c $(LOGIC_SRCS) $(CIRCUITS_SRCS) $(CPU_SRCS) $(MEM_SRCS) -o tests/test_dec_enc
 
 test_alu:
 	$(CC) $(CFLAGS) tests/test_alu.c $(LOGIC_SRCS) $(CIRCUITS_SRCS) $(CPU_SRCS) $(TEST_UTIL) $(MEM_SRCS) -o tests/test_alu
