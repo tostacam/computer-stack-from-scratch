@@ -18,7 +18,7 @@ void test_ram() {
   ram.write_enable = 1;
   RAM64_tick(&ram);
   ram.read_enable = 1;
-  RAM64_read(&ram);
+  RAM64_eval(&ram);
   assert(is_equal_bus_uint(ram.read_data, UINT64_MAX) == 1);
 
   // w63 = 5
@@ -27,7 +27,7 @@ void test_ram() {
   ram.write_enable = 1;
   RAM64_tick(&ram);
   ram.read_enable = 1;
-  RAM64_read(&ram);
+  RAM64_eval(&ram);
   assert(is_equal_bus_uint(ram.read_data, 5ULL) == 1);
 
   // w0 = 0
@@ -36,7 +36,7 @@ void test_ram() {
   ram.write_enable = 1;
   RAM64_tick(&ram);
   ram.read_enable = 1;
-  RAM64_read(&ram);
+  RAM64_eval(&ram);
   assert(is_equal_bus_uint(ram.read_data, 0ULL) == 1);
 }
 

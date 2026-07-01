@@ -11,7 +11,7 @@ void RAM64_init(RAM64 *ram) {
   ram->read_enable  = 0;
 }
 
-void RAM64_read(RAM64* ram) {
+void RAM64_eval(RAM64* ram) {
   if (ram->read_enable == 1) {
     ram->read_data = register64_output(&ram->register_data[decode_amount(ram->address)]);
     ram->read_enable = 0;
