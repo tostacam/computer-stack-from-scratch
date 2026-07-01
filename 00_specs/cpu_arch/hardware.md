@@ -12,19 +12,3 @@
 | ALU | 64-bit |
 | Clock | Single-cycle |
 | Endianness | Little-endian |
-
-## ALU Outputs
-
-- Result `[63:0]`
-- Zero
-
-## Current ALU Operations
-
-- ADD
-- SUB
-- NOT
-- AND
-- OR
-- XOR
-- SHL
-- SHR
