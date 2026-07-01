@@ -31,9 +31,6 @@ typedef struct {
   // output
   bus64 output;
   bit   f_zero; 
-  bit   f_carry;
-  bit   f_overflow;
-  bit   f_negative;
 } ALU;
 
 void alu_init(ALU *alu);
