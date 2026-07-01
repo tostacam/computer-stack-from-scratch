@@ -15,12 +15,15 @@
 
 ## Control Truth Table
 
-| Instruction | ALUSrc | MemtoReg | RegWrite | MemReead | MemWrite | Branch | ALUOp |
-|-------------|:--------:|:------:|:-------:|:--------:|:--------:|:------:|:-----:|
-| R-Type | 0 | 0 | 1 | 0 | 0 | 0 | 10 |
-| lw | 1 | 1 | 1 | 1 | 0 | 0 | 00 |
-| sw | 1 | X | 0 | 0 | 1 | 0 | 00 |
-| beq | 0 | X | 0 | 0 | 0 | 1 | 01 |
+| Instruction | Type | ALUSrc | MemToReg | RegWrite | MemRead | MemWrite | Branch | ALUOp | ALU Operation |
+|:-----------:|:----:|:------:|:--------:|:--------:|:-------:|:--------:|:------:|:-----:|:-------------:|
+| `add`  | R  | 0 | 0 | 1 | 0 | 0 | 0 | `10` | ADD |
+| `sub`  | R  | 0 | 0 | 1 | 0 | 0 | 0 | `10` | SUB |
+| `addi` | I  | 1 | 0 | 1 | 0 | 0 | 0 | `00` | ADD |
+| `lw`   | I  | 1 | 1 | 1 | 1 | 0 | 0 | `00` | ADD (base + offset) |
+| `sw`   | S  | 1 | X | 0 | 0 | 1 | 0 | `00` | ADD (base + offset) |
+| `beq`  | SB | 0 | X | 0 | 0 | 0 | 1 | `01` | SUB (compare) |
+| `bne`  | SB | 0 | X | 0 | 0 | 0 | 1 | `01` | SUB (compare) |
 
 ---
 
