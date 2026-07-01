@@ -23,7 +23,9 @@ typedef struct {
   program_counter pc;
   register_file   rf;
   ROM64           rom;
-  RAM64           ram; 
+  RAM64           ram;
+
+  bus64           instruction; 
   control_signals control;
 } CPU;
 
