@@ -18,9 +18,9 @@ FullAdder full_adder(bit a, bit b, bit cin) {
 }
 
 add64_result add64(bus64 a, bus64 b, bit cin) {
-  add64_result r;
-  bit next_carry = cin;
-  FullAdder f;
+  add64_result  r;
+  bit           next_carry = cin;
+  FullAdder     f;
 
   for (int i = 0; i < BUS64_WIDTH; ++i) {
     bit a_i = bus64_getbit(a, i);
@@ -32,6 +32,24 @@ add64_result add64(bus64 a, bus64 b, bit cin) {
     next_carry = f.carry_out;
   }
   r.carry_out = next_carry;
+
+  return r;
+}
+
+bus64 add64_no_crry(bus64 a, bus64 b) {
+  bus64     r;
+  bit       next_carry = 0;
+  FullAdder f;
+
+  for (int i = 0; i < BUS64_WIDTH; ++i) {
+    bit a_i = bus64_getbit(a, i);
+    bit b_i = bus64_getbit(b, i);
+  
+    f = full_adder(a_i, b_i, next_carry);
+    bus64_setbit(&r, i, f.sum);
+    
+    next_carry = f.carry_out;
+  }
 
   return r;
 }

@@ -24,5 +24,6 @@ typedef struct {
 } add64_result;
 
 add64_result add64(bus64 a, bus64 b, bit cin);
+bus64 add64_no_crry(bus64 a, bus64 b);
 
 #endif

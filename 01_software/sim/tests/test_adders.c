@@ -44,7 +44,7 @@ void test_add64() {
   b = bus64_zero();
   r = add64(a, b, 0);
   for (int i = 0; i < BUS64_WIDTH; ++i) {
-    assert(bus64_getbit(r.bus64_sum, i) == 0);    
+    assert(bus64_getbit(r.bus64_sum, i) == 0);
   }
   assert(r.carry_out == 0);
 
@@ -52,9 +52,19 @@ void test_add64() {
   b = bus64_ones();
   r = add64(a, b, 1);
   for (int i = 0; i < BUS64_WIDTH; ++i) {
-    assert(bus64_getbit(r.bus64_sum, i) == 1);    
+    assert(bus64_getbit(r.bus64_sum, i) == 1);
   }
   assert(r.carry_out == 1);
+
+  bus64 r_no_crry = add64_no_crry(bus64_zero(), bus64_zero());
+  for (int i = 0; i < BUS64_WIDTH; ++i) {
+    assert(bus64_getbit(r_no_crry, i) == 0);
+  }
+
+  r_no_crry = add64_no_crry(bus64_zero(), bus64_ones());
+  for (int i = 0; i < BUS64_WIDTH; ++i) {
+    assert(bus64_getbit(r_no_crry, i) == 1);
+  }
 }
 
 int main() {
