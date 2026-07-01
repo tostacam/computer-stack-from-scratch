@@ -8,7 +8,7 @@ void alu_init(ALU *alu) {
   alu->f_zero     = 0;
 }
 
-void alu_tick(ALU *alu) {
+void alu_eval(ALU *alu) {
   add64_result  r;
 
   switch(alu->opcode) {

@@ -18,6 +18,7 @@ typedef struct {
 } RAM64;
 
 void RAM64_init(RAM64 *ram);
+void RAM64_eval(RAM64 *ram);
 void RAM64_tick(RAM64 *ram);
 
 #endif

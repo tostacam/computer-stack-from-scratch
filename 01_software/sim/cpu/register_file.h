@@ -21,6 +21,7 @@ typedef struct {
 } register_file;
 
 void register_file_init(register_file *rf);
+void register_file_eval(register_file *rf);
 void register_file_tick(register_file *rf);
 
 #endif 

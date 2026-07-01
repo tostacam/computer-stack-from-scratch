@@ -26,7 +26,7 @@ void test_register_file() {
 
   rf.read_addr_a = encode_amount(1ULL);
   rf.read_addr_b = encode_amount(31ULL);
-  register_file_tick(&rf);
+  register_file_eval(&rf);
 
   /*
   for (int i = 0; i < REGISTER_FILE_SIZE; i = i + 4) {

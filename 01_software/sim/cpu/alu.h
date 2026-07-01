@@ -34,6 +34,6 @@ typedef struct {
 } ALU;
 
 void alu_init(ALU *alu);
-void alu_tick(ALU *alu);
+void alu_eval(ALU *alu);
 
 #endif

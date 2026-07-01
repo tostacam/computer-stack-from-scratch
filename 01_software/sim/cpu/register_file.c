@@ -13,10 +13,16 @@ void register_file_init(register_file *rf) {
   rf->read_data_b   = bus64_zero();
 }
 
-void register_file_tick(register_file *rf) {
-  uint64_t wr_addr = decode_amount(rf->write_addr);
+void register_file_eval(register_file *rf) {
   uint64_t a_addr = decode_amount(rf->read_addr_a);
   uint64_t b_addr = decode_amount(rf->read_addr_b);
+  
+  rf->read_data_a = register64_output(&rf->register_data[a_addr]);
+  rf->read_data_b = register64_output(&rf->register_data[b_addr]);
+}
+
+void register_file_tick(register_file *rf) {
+  uint64_t wr_addr = decode_amount(rf->write_addr);
 
   if (rf->write_enable == 1) {
     // x0 always 0 (RISC-V)
@@ -30,7 +36,4 @@ void register_file_tick(register_file *rf) {
   // clock tick
   register64_trigger(&rf->register_data[wr_addr]);
   register64_disable(&rf->register_data[wr_addr]);
-
-  rf->read_data_a = register64_output(&rf->register_data[a_addr]);
-  rf->read_data_b = register64_output(&rf->register_data[b_addr]);
 }
