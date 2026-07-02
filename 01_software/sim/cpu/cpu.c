@@ -1,11 +1,11 @@
 #include "cpu.h"
 
-void CPU_init(CPU *cpu, ROM64 *rom) {
+void CPU_init(CPU *cpu, ROM *rom) {
   program_counter_init(&cpu->pc);
   cpu->rom = *rom;
   register_file_init(&cpu->rf);
   alu_init(&cpu->alu);
-  RAM64_init(&cpu->ram);
+  RAM_init(&cpu->ram);
 
   cpu->instruction        = bus64_zero();
   cpu->jump_address       = bus64_zero();
@@ -20,7 +20,7 @@ void CPU_init(CPU *cpu, ROM64 *rom) {
 }
 
 static void fetch(CPU *cpu) {
-  cpu->instruction = cpu->rom.words[decode_amount(register64_output(&cpu->pc.output_reg))];
+  cpu->instruction = encode_amount(ROM_read(&cpu->rom, MEM_WORD_SIZE));
 }
 
 static enum alu_op alu_control(bit alu_op[2], uint8_t funct3, uint8_t funct7) {
@@ -195,18 +195,18 @@ static void execute(CPU *cpu) {
 static void memory_access(CPU *cpu) {
   assert(!(cpu->ram.read_enable && cpu->ram.write_enable));
 
-  cpu->ram.address      = cpu->alu.output;
-  cpu->ram.write_data   = cpu->rf.read_data_b;
+  cpu->ram.address      = decode_amount(cpu->alu.output);
+  cpu->ram.write_data   = decode_amount(cpu->rf.read_data_b);
   cpu->ram.write_enable = cpu->control.mem_write;
   cpu->ram.read_enable  = cpu->control.mem_read;
 
-  RAM64_eval(&cpu->ram);
-  RAM64_tick(&cpu->ram);
+  RAM_read(&cpu->ram, MEM_WORD_SIZE);
+  RAM_write(&cpu->ram, MEM_DWRD_SIZE);
 }
 
 static void write_back(CPU *cpu) {
   cpu->rf.write_enable = cpu->control.reg_write;
-  cpu->rf.write_data = cpu->control.mem_to_reg ? cpu->ram.read_data : cpu->alu.output;
+  cpu->rf.write_data = cpu->control.mem_to_reg ? encode_amount(cpu->ram.read_data) : cpu->alu.output;
   register_file_tick(&cpu->rf);
 }
 

@@ -23,15 +23,15 @@ typedef struct {
   ALU             alu;
   program_counter pc;
   register_file   rf;
-  ROM64           rom;
-  RAM64           ram;
+  ROM             rom;
+  RAM             ram;
 
   bus64           instruction; 
   bus64           jump_address;
   control_signals control;
 } CPU;
 
-void CPU_init(CPU *cpu, ROM64 *rom);
+void CPU_init(CPU *cpu, ROM *rom);
 void CPU_cycle(CPU *cpu);
 
 #endif
