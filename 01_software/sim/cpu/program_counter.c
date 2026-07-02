@@ -1,6 +1,7 @@
 #include "program_counter.h"
 
 void program_counter_init(program_counter *pc) {
+  pc->count_inc   = encode_amount(INSTRUCTION_WIDTH);
   pc->jump_addr   = bus64_zero();
   pc->clear       = 0;
   pc->jump        = 0;
@@ -8,14 +9,11 @@ void program_counter_init(program_counter *pc) {
 }
 
 void program_counter_tick(program_counter *pc) {
-  add64_result  res_step;
-  bus64         output;
- 
-  res_step = add64(register64_output(&pc->output_reg), encode_amount(INSTRUCTION_WIDTH), 0);
-  pc->count_in = res_step.bus64_sum;
-  output = mux64(pc->count_in, bus64_zero(), pc->clear);
-  output = mux64(output, pc->jump_addr, pc->jump);
-  register64_input(&pc->output_reg, output);
+  bus64 next_addr = register64_output(&pc->output_reg);
+
+  next_addr = pc->clear ? bus64_zero() : add64_no_crry(next_addr, pc->count_inc);
+  next_addr = pc->jump ? pc->jump_addr : next_addr; 
+  register64_input(&pc->output_reg, next_addr);
 
   pc->output_reg.enable = 1;
   register64_trigger(&pc->output_reg);

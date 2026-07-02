@@ -47,7 +47,7 @@ test_counter:
 	$(CC) $(CFLAGS) tests/test_counter.c $(LOGIC_SRCS) $(CIRCUITS_SRCS) $(CPU_SRCS) $(TEST_UTIL) -o tests/test_counter
 
 test_program_counter:
-	$(CC) $(CFLAGS) tests/test_program_counter.c $(LOGIC_SRCS) $(CIRCUITS_SRCS) $(CPU_SRCS) $(TEST_UTIL) -o tests/test_program_counter
+	$(CC) $(CFLAGS) tests/test_program_counter.c $(LOGIC_SRCS) $(CIRCUITS_SRCS) $(CPU_SRCS) $(MEM_SRCS) $(TEST_UTIL) -o tests/test_program_counter
 
 test_register_file:
 	$(CC) $(CFLAGS) tests/test_register_file.c $(LOGIC_SRCS) $(CIRCUITS_SRCS) $(CPU_SRCS) $(MEM_SRCS) $(TEST_UTIL) -o tests/test_register_file

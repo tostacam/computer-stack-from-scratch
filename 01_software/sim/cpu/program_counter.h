@@ -9,7 +9,7 @@
 #define INSTRUCTION_WIDTH 4
 
 typedef struct {
-  bus64       count_in;
+  bus64       count_inc;
   bus64       jump_addr;
   bit         clear;
   bit         jump;
@@ -17,6 +17,7 @@ typedef struct {
 } program_counter;
 
 void program_counter_init(program_counter *pc);
+void program_counter_eval(program_counter *pc);
 void program_counter_tick(program_counter *pc);
 
 #endif
