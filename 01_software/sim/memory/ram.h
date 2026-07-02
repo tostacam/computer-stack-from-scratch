@@ -6,7 +6,7 @@
 #include "register.h"
 #include "bus.h"
 #include "bit.h"
-#define RAM_SIZE 64
+#define RAM_SIZE 1024
 
 enum MEM_SIZE {
   MEM_BYTE_SIZE = 1,
