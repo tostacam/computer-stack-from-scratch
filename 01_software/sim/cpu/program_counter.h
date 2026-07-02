@@ -17,7 +17,6 @@ typedef struct {
 } program_counter;
 
 void program_counter_init(program_counter *pc);
-void program_counter_eval(program_counter *pc);
 void program_counter_tick(program_counter *pc);
 
 #endif
