@@ -8,6 +8,7 @@ void CPU_init(CPU *cpu, ROM64 *rom) {
   RAM64_init(&cpu->ram);
 
   cpu->instruction        = bus64_zero();
+  cpu->jump_address       = bus64_zero();
   cpu->control.alu_src    = 0;
   cpu->control.mem_to_reg = 0;
   cpu->control.reg_write  = 0;
@@ -42,7 +43,7 @@ static enum alu_op alu_control(bit alu_op[2], uint8_t funct3, uint8_t funct7) {
       return ALU_OP_SUB;
   }
 
-  return ALU_OP_NOP;
+  return ALU_OP_ADD;
 }
 
 static void decode(CPU *cpu) {
@@ -182,25 +183,46 @@ static void decode(CPU *cpu) {
         cpu->alu.b = encode_amount(imm_UJ_bits);
         break;
     }
+
+    cpu->jump_address = add64_no_crry(register64_output(&cpu->pc.output_reg), cpu->alu.b);
   }
 }
 
 static void execute(CPU *cpu) {
   alu_eval(&cpu->alu);
-
-
 }
 
-//static void memory_access(CPU *cpu);
-//static void write_back(CPU *cpu);
+static void memory_access(CPU *cpu) {
+  assert(!(cpu->ram.read_enable && cpu->ram.write_enable));
+
+  cpu->ram.address      = cpu->alu.output;
+  cpu->ram.write_data   = cpu->rf.read_data_b;
+  cpu->ram.write_enable = cpu->control.mem_write;
+  cpu->ram.read_enable  = cpu->control.mem_read;
+
+  RAM64_eval(&cpu->ram);
+  RAM64_tick(&cpu->ram);
+}
+
+static void write_back(CPU *cpu) {
+  cpu->rf.write_enable = cpu->control.reg_write;
+  cpu->rf.write_data = cpu->control.mem_to_reg ? cpu->ram.read_data : cpu->alu.output;
+  register_file_tick(&cpu->rf);
+}
+
+static void update_pc(CPU *cpu) {
+  cpu->pc.jump_addr = cpu->jump_address;
+  if (cpu->alu.f_zero && cpu->control.branch) {
+    cpu->pc.jump = 1;
+  }
+  program_counter_tick(&cpu->pc);
+}
 
 void CPU_cycle(CPU *cpu) {
   fetch(cpu);
   decode(cpu);
   execute(cpu);
-  /*
   memory_access(cpu);
   write_back(cpu);
-  */
-  register_file_tick(&cpu->rf);
+  update_pc(cpu);
 }

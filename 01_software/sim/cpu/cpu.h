@@ -1,6 +1,7 @@
 #ifndef CPU_CORE_H
 #define CPU_CORE_H
 
+#include <assert.h>
 #include "register_file.h"
 #include "decoder_encoder.h"
 #include "program_counter.h"
@@ -26,6 +27,7 @@ typedef struct {
   RAM64           ram;
 
   bus64           instruction; 
+  bus64           jump_address;
   control_signals control;
 } CPU;
 
