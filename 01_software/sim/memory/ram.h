@@ -1,24 +1,31 @@
 #ifndef RAM_H
 #define RAM_H
 
+#include <stdint.h>
 #include "decoder_encoder.h"
 #include "register.h"
 #include "bus.h"
 #include "bit.h"
-#define RAM64_WORDS 64
+#define RAM_SIZE 64
 
-// RAM64 = 64reg (1word/reg) = 64 words
+enum MEM_SIZE {
+  MEM_BYTE_SIZE = 1,
+  MEM_HALF_SIZE = 2,
+  MEM_WORD_SIZE = 4,
+  MEM_DWRD_SIZE = 8
+};
+
 typedef struct {
-  register64  register_data[RAM64_WORDS];
-  bus64       address;
-  bus64       write_data;
-  bit         write_enable;
-  bus64       read_data;
-  bit         read_enable;
-} RAM64;
+  uint8_t   bytes[RAM_SIZE];
+  uint64_t  address;
+  uint64_t  write_data;
+  uint64_t  read_data; 
+  bit       write_enable;
+  bit       read_enable;
+} RAM;
 
-void RAM64_init(RAM64 *ram);
-void RAM64_eval(RAM64 *ram);
-void RAM64_tick(RAM64 *ram);
+void RAM_init(RAM *ram);
+void RAM_read(RAM *ram, enum MEM_SIZE size);
+void RAM_write(RAM *ram, enum MEM_SIZE size);
 
 #endif

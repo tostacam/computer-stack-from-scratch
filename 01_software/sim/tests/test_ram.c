@@ -4,40 +4,36 @@
 #include "ram.h"
 
 void test_ram() {
-  RAM64 ram;
-  RAM64_init(&ram);
+  RAM ram;
+  RAM_init(&ram);
 
-  // w0 = w1 = ... = w63 = 0
-  for (int i = 0; i < RAM64_WORDS; ++i) {
-    assert(is_equal_bus_uint(register64_output(&ram.register_data[i]), 0ULL));
-  }
-
-  // w0 = UINT64_MAX
-  ram.address = encode_amount(0ULL);
-  ram.write_data = encode_amount(UINT64_MAX);
+  // w[0:7] = UINT64_MAX
+  ram.address = 0ULL;
+  ram.write_data = UINT64_MAX;
   ram.write_enable = 1;
-  RAM64_tick(&ram);
+  RAM_write(&ram, MEM_DWRD_SIZE);
   ram.read_enable = 1;
-  RAM64_eval(&ram);
-  assert(is_equal_bus_uint(ram.read_data, UINT64_MAX) == 1);
+  RAM_read(&ram, MEM_DWRD_SIZE);
+  assert(ram.read_data == UINT64_MAX);
 
-  // w63 = 5
-  ram.address = encode_amount(63ULL);
-  ram.write_data = encode_amount(5ULL);
+  // w[63] = 5
+  ram.address = 63ULL;
+  ram.write_data = 5ULL;
   ram.write_enable = 1;
-  RAM64_tick(&ram);
+  RAM_write(&ram, MEM_BYTE_SIZE);
   ram.read_enable = 1;
-  RAM64_eval(&ram);
-  assert(is_equal_bus_uint(ram.read_data, 5ULL) == 1);
+  RAM_read(&ram, MEM_BYTE_SIZE);
+  assert(ram.read_data == 5ULL);
 
-  // w0 = 0
-  ram.address = encode_amount(0ULL);
-  ram.write_data = encode_amount(0ULL);
+  // w[0:7] = UINT32_MAX
+  ram.address = 4;
+  ram.write_data = 0;
   ram.write_enable = 1;
-  RAM64_tick(&ram);
+  RAM_write(&ram, MEM_WORD_SIZE);
+  ram.address = 0;
   ram.read_enable = 1;
-  RAM64_eval(&ram);
-  assert(is_equal_bus_uint(ram.read_data, 0ULL) == 1);
+  RAM_read(&ram, MEM_DWRD_SIZE);
+  assert(ram.read_data == UINT32_MAX);
 }
 
 int main() {

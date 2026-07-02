@@ -1,16 +1,16 @@
 #ifndef ROM_H
 #define ROM_H
 
+#include <stdint.h>
 #include "bus.h"
 #include "decoder_encoder.h"
-#include <stdint.h>
-#define ROM64_WORDS 64
+#define ROM_SIZE 64
 
 typedef struct {
-  bus64 words[ROM64_WORDS];
-} ROM64;
+  uint8_t bytes[ROM_SIZE];
+} ROM;
 
-void ROM64_init(ROM64 *rom, uint64_t *data, uint64_t size);
-bus64 ROM64_read(ROM64 *rom, bus64 address);
+void ROM_init(ROM *rom, uint8_t *data, uint64_t size);
+uint8_t ROM_read(ROM *rom, uint64_t address);
 
 #endif
