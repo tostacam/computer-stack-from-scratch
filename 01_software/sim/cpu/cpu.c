@@ -20,7 +20,12 @@ void CPU_init(CPU *cpu, ROM *rom) {
 }
 
 static void fetch(CPU *cpu) {
-  cpu->instruction = encode_amount(ROM_read(&cpu->rom, MEM_WORD_SIZE));
+  uint64_t fetch_address = decode_amount(register64_output(&cpu->pc.output_reg));
+  uint32_t instr = (ROM_read(&cpu->rom, fetch_address)) | \
+                   (ROM_read(&cpu->rom, fetch_address + 1) << 8) | \
+                   (ROM_read(&cpu->rom, fetch_address + 2) << 16) | \
+                   (ROM_read(&cpu->rom, fetch_address + 3) << 24);
+  cpu->instruction = encode_amount((uint64_t)instr);
 }
 
 static enum alu_op alu_control(bit alu_op[2], uint8_t funct3, uint8_t funct7) {

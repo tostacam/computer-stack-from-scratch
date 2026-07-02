@@ -2,6 +2,7 @@
 #define CPU_CORE_H
 
 #include <assert.h>
+#include <stdio.h>
 #include "register_file.h"
 #include "decoder_encoder.h"
 #include "program_counter.h"
