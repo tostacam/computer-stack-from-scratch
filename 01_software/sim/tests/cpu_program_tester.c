@@ -1,163 +1,85 @@
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "cpu.h"
 
-void test_add_program() {
-  /*
-   * addi x1, x0, 5
-   * addi x2, x0, 7
-   * add x3, x1, x2
-   *
-   */
+typedef struct {
+  uint64_t regs[32];
+  uint64_t pc;
+} CPU_expected;
 
-  // ROM Load
+void load_program(ROM *rom, const char *filename);
+void load_expected(CPU_expected *expected, const char *filename);
+void CPU_run(CPU *cpu);
+void verify(CPU *cpu, CPU_expected *expected);
+
+int main(){
+  
+  // Load progam into ROM
   ROM rom;
-  uint32_t program_code[3];
-  program_code[0] = 0x00500093;
-  program_code[1] = 0x00700113;
-  program_code[2] = 0x002081B3;
-  ROM_init(&rom, (uint8_t *)program_code, 3 * sizeof(uint32_t));
+  load_program(&rom, "tests/programs/bne.txt");
 
-  // CPU execute
+  // Load ecpted results
+  CPU_expected expected = {0};
+  load_expected(&expected, "tests/programs/bne.exp");
+
+  // Run CPU
   CPU cpu;
   CPU_init(&cpu, &rom);
-  CPU_cycle(&cpu);
-  CPU_cycle(&cpu);
-  CPU_cycle(&cpu);
+  CPU_run(&cpu);
 
-  // Result
-  printf("\nADD\n");
-  for (int i = 1; i < 4; ++i) {
-    cpu.rf.read_addr_a = encode_amount(i);
-    register_file_eval(&cpu.rf);
-    printf("reg x[%d]: %llu\n", i, decode_amount(cpu.rf.read_data_a));
-  }
-  printf("PC: %llu\n", decode_amount(register64_output(&cpu.pc.output_reg)));
+  // Compare results
+  verify(&cpu, &expected);
+
+  printf("TEST PASSED");
 }
 
-void test_lwsw_program() {
-  /*
-   * addi x1, x0, 100
-   * addi x2, x0, 42
-   * sw   x2, 0(x1)
-   * lw   x3, 0(x1)
-   *
-   */
+void load_program(ROM *rom, const char *filename) {
+  FILE *fp = fopen(filename, "r");
+  assert(fp);
+  
 
-  // ROM Load
-  ROM rom;
-  uint32_t program_code[4];
-  program_code[0] = 0x06400093;
-  program_code[1] = 0x02A00113;
-  program_code[2] = 0x0020A023;
-  program_code[3] = 0x0000A183;
-  ROM_init(&rom, (uint8_t *)program_code, 4 * sizeof(uint32_t));
+  uint32_t instr;
+  int i = 0;
 
-  // CPU execute
-  CPU cpu;
-  CPU_init(&cpu, &rom);
-  CPU_cycle(&cpu);
-  CPU_cycle(&cpu);
-  CPU_cycle(&cpu);
-  CPU_cycle(&cpu);
-
-  // Result
-  printf("\nLW/SW\n");
-  for (int i = 1; i < 4; ++i) {
-    cpu.rf.read_addr_a = encode_amount(i);
-    register_file_eval(&cpu.rf);
-    printf("reg x[%d]: %llu\n", i, decode_amount(cpu.rf.read_data_a));
+  while (fscanf(fp, "%x", &instr) == 1) {
+    rom->bytes[i++] = instr & 0xFF;
+    rom->bytes[i++] = (instr >> 8) & 0xFF;
+    rom->bytes[i++] = (instr >> 16) & 0xFF;
+    rom->bytes[i++] = (instr >> 24) & 0xFF;
   }
-
-  printf("RAM[100]: ");
-  for (int i = 0; i < 4; ++i) {
-    printf("%u", cpu.ram.bytes[103 - i]);
-  }
-  printf("\n");
-  printf("PC: %llu\n", decode_amount(register64_output(&cpu.pc.output_reg)));
+  rom->size = i / 4;
+  
+  fclose(fp);
 }
 
-void test_beq_program() {
-  /*
-   * addi x1, x0, 5
-   * addi x2, x0, 5
-   * beq  x1, x2, +8
-   * addi x3, x0, 1
-   * addi x4, x0, 2
-   *
-   */
+void load_expected(CPU_expected *expected, const char *filename) {
+  FILE *fp = fopen(filename, "r");
+  assert(fp);
 
-  // ROM Load
-  ROM rom;
-  uint32_t program_code[5];
-  program_code[0] = 0x00500093;
-  program_code[1] = 0x00500113;
-  program_code[2] = 0x00208463;
-  program_code[3] = 0x00100193;
-  program_code[4] = 0x00200213;
-  ROM_init(&rom, (uint8_t *)program_code, 5 * sizeof(uint32_t));
+  char name[32];
+  uint32_t value;
 
-  // CPU execute
-  CPU cpu;
-  CPU_init(&cpu, &rom);
-  CPU_cycle(&cpu);
-  CPU_cycle(&cpu);
-  CPU_cycle(&cpu);
-  CPU_cycle(&cpu);
-
-  // Result
-  printf("\nBEQ\n");
-  for (int i = 1; i < 5; ++i) {
-    cpu.rf.read_addr_a = encode_amount(i);
-    register_file_eval(&cpu.rf);
-    printf("reg x[%d]: %llu\n", i, decode_amount(cpu.rf.read_data_a));
+  while (fscanf(fp, "%31[^=]=%u\n", name, &value) == 2) {
+    if (name[0] == 'x')
+      expected->regs[atoi(name + 1)] = value;
+    else if (strcmp(name, "pc") == 0)
+      expected->pc = value;
   }
-  printf("PC: %llu\n", decode_amount(register64_output(&cpu.pc.output_reg)));
 
+  fclose(fp);
 }
 
-void test_bne_program() {
-  /*
-   * addi x1, x0, 5
-   * addi x2, x0, 7
-   * bne  x1, x2, +8
-   * addi x3, x0, 1
-   * addi x4, x0, 2
-   *
-   */
-
-  // ROM Load
-  ROM rom;
-  uint32_t program_code[5];
-  program_code[0] = 0x00500093;
-  program_code[1] = 0x00700113;
-  program_code[2] = 0x00209463;
-  program_code[3] = 0x00100193;
-  program_code[4] = 0x00200213;
-  ROM_init(&rom, (uint8_t *)program_code, 5 * sizeof(uint32_t));
-
-  // CPU execute
-  CPU cpu;
-  CPU_init(&cpu, &rom);
-  CPU_cycle(&cpu);
-  CPU_cycle(&cpu);
-  CPU_cycle(&cpu);
-  CPU_cycle(&cpu);
-
-  // Result
-  printf("\nBEQ\n");
-  for (int i = 1; i < 5; ++i) {
-    cpu.rf.read_addr_a = encode_amount(i);
-    register_file_eval(&cpu.rf);
-    printf("reg x[%d]: %llu\n", i, decode_amount(cpu.rf.read_data_a));
+void CPU_run(CPU *cpu) {
+  while (decode_amount(register64_output(&cpu->pc.output_reg)) < cpu->rom.size * 4) {
+    CPU_cycle(cpu);
   }
-  printf("PC: %llu\n", decode_amount(register64_output(&cpu.pc.output_reg)));
-
 }
 
-int main() {
-  test_add_program();
-  test_lwsw_program();
-  test_beq_program();
-  test_bne_program();
+void verify(CPU *cpu, CPU_expected *expected) {
+  for (int i = 0; i < 32; i++) {
+    assert(decode_amount(register64_output(&cpu->rf.register_data[i])) == expected->regs[i]);
+  }
+  assert(decode_amount(register64_output(&cpu->pc.output_reg)) == expected->pc);
 }

@@ -58,11 +58,11 @@ test_ram:
 test_rom:
 	$(CC) $(CFLAGS) tests/test_rom.c $(LOGIC_SRCS) $(CIRCUITS_SRCS) $(CPU_SRCS) $(TEST_UTIL) $(MEM_SRCS) -o tests/test_rom
 
-short_cpu_test:
-	$(CC) $(CFLAGS) tests/short_cpu_test.c $(LOGIC_SRCS) $(CIRCUITS_SRCS) $(CPU_SRCS) $(TEST_UTIL) $(MEM_SRCS) -o tests/short_cpu_test
+cpu_tester:
+	$(CC) $(CFLAGS) tests/cpu_program_tester.c $(LOGIC_SRCS) $(CIRCUITS_SRCS) $(CPU_SRCS) $(TEST_UTIL) $(MEM_SRCS) -o tests/cpu_program_tester
 
 clean:
 	rm -f tests/test_nand tests/test_gates tests/test_bus tests/test_adders tests/test_mux \
 		tests/test_bitwise tests/test_shifters tests/test_comparators tests/test_dec_enc \
 		tests/test_alu tests/test_flip_flop tests/test_register tests/test_counter tests/test_program_counter \
-		tests/test_register_file tests/test_ram tests/test_rom tests/short_cpu_test
+		tests/test_register_file tests/test_ram tests/test_rom tests/cpu_program_tester
