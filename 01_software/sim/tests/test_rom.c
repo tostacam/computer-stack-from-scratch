@@ -12,9 +12,13 @@ void test_rom() {
   data[2] = 90;
   ROM_init(&rom, data, 3ULL);
 
-  assert(ROM_read(&rom, 0) == 20U);
-  assert(ROM_read(&rom, 1) == 65U);
-  assert(ROM_read(&rom, 2) == 90U);
+  uint8_t res[3];
+  res[0] = 20;
+  res[1] = 65;
+  res[2] = 90;
+  for (uint64_t i = 0; i < rom.size; ++i) {
+    assert(ROM_read(&rom, i) == res[i]);
+  }
 }
 
 int main() {
