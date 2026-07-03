@@ -15,6 +15,9 @@ void program_counter_tick(program_counter *pc) {
   next_addr = pc->jump ? pc->jump_addr : next_addr; 
   register64_input(&pc->output_reg, next_addr);
 
+  pc->clear = 0;
+  pc->jump = 0;
+
   pc->output_reg.enable = 1;
   register64_trigger(&pc->output_reg);
   pc->output_reg.enable = 0;
