@@ -17,6 +17,7 @@ typedef struct {
   bit mem_read;
   bit mem_write;
   bit branch;
+  bit branch_neq;
   bit alu_op[2];
 } control_signals;
 

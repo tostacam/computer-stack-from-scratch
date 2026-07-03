@@ -51,7 +51,7 @@ void test_lwsw_program() {
   program_code[1] = 0x02A00113;
   program_code[2] = 0x0020A023;
   program_code[3] = 0x0000A183;
-  ROM_init(&rom, (uint8_t *)program_code, 3 * sizeof(uint32_t));
+  ROM_init(&rom, (uint8_t *)program_code, 4 * sizeof(uint32_t));
 
   // CPU execute
   CPU cpu;
@@ -95,12 +95,50 @@ void test_beq_program() {
   program_code[2] = 0x00208463;
   program_code[3] = 0x00100193;
   program_code[4] = 0x00200213;
-  ROM_init(&rom, (uint8_t *)program_code, 3 * sizeof(uint32_t));
+  ROM_init(&rom, (uint8_t *)program_code, 5 * sizeof(uint32_t));
 
   // CPU execute
   CPU cpu;
   CPU_init(&cpu, &rom);
   CPU_cycle(&cpu);
+  CPU_cycle(&cpu);
+  CPU_cycle(&cpu);
+  CPU_cycle(&cpu);
+
+  // Result
+  printf("\nBEQ\n");
+  for (int i = 1; i < 5; ++i) {
+    cpu.rf.read_addr_a = encode_amount(i);
+    register_file_eval(&cpu.rf);
+    printf("reg x[%d]: %llu\n", i, decode_amount(cpu.rf.read_data_a));
+  }
+  printf("PC: %llu\n", decode_amount(register64_output(&cpu.pc.output_reg)));
+
+}
+
+void test_bne_program() {
+  /*
+   * addi x1, x0, 5
+   * addi x2, x0, 7
+   * bne  x1, x2, +8
+   * addi x3, x0, 1
+   * addi x4, x0, 2
+   *
+   */
+
+  // ROM Load
+  ROM rom;
+  uint32_t program_code[5];
+  program_code[0] = 0x00500093;
+  program_code[1] = 0x00700113;
+  program_code[2] = 0x00209463;
+  program_code[3] = 0x00100193;
+  program_code[4] = 0x00200213;
+  ROM_init(&rom, (uint8_t *)program_code, 5 * sizeof(uint32_t));
+
+  // CPU execute
+  CPU cpu;
+  CPU_init(&cpu, &rom);
   CPU_cycle(&cpu);
   CPU_cycle(&cpu);
   CPU_cycle(&cpu);
@@ -121,4 +159,5 @@ int main() {
   test_add_program();
   test_lwsw_program();
   test_beq_program();
+  test_bne_program();
 }
