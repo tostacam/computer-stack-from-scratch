@@ -28,7 +28,7 @@ module dff_tb;
     // d = 0 + clk -> q = 0
     d = 0;
     @(posedge clk); #1;
-    assert(q == 1)
+    assert(q == 0)
       else $fatal();
 
     $display("TESTS PASSED.");
