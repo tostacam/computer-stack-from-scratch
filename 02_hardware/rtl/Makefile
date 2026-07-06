@@ -14,12 +14,12 @@ test_register:
 	xsim register_tb -runall
 
 test_rom:
-	xvlog --sv $(PRIM_SRC) tests/rom_tb.sv
+	xvlog --sv $(MEM_SRC) tests/rom_tb.sv
 	xelab rom_tb -debug typical
 	xism rom_tb -runall)
 
 test_ram:
-	xvlog --sv $(PRIM_SRC) tests/ram_tb.sv
+	xvlog --sv $(MEM_SRC) tests/ram_tb.sv
 	xelab ram_tb -debug typical
 	xism ram_tb -runall)
 
