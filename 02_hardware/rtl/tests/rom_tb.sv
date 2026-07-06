@@ -1,6 +1,4 @@
-module rom_tb #(
-  parameter INST_SIZE = 32
-);
+module rom_tb;
 
   logic [63:0] address;
   logic [31:0] instruction;
@@ -34,7 +32,7 @@ module rom_tb #(
     assert (instruction == 32'h12345678)
       else $fatal();
 
-    $display("ROM tests passed!");
+    $display("ALL TESTS PASSED.");
     $finish;
   end
 
