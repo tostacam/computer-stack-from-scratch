@@ -16,12 +16,12 @@ test_register:
 test_rom:
 	xvlog --sv $(MEM_SRC) tests/rom_tb.sv
 	xelab rom_tb -debug typical
-	xism rom_tb -runall)
+	xsim rom_tb -runall
 
 test_ram:
 	xvlog --sv $(MEM_SRC) tests/ram_tb.sv
 	xelab ram_tb -debug typical
-	xism ram_tb -runall)
+	xsim ram_tb -runall
 
 clean: 
 	rm -rf xsim.dir *.log *.jou *.pb *.wdb *.vcd
