@@ -29,10 +29,10 @@ assign rd_data = {
 };
 
 // sequential write
-always_ff @(posedge clk)
+always_ff @(posedge clk) begin
   $display("clk=%0t wr_enable=%b addr=%0d", $time, wr_enable, mem_addr);
   if (wr_enable) begin
-    $dipslay("WRITE");
+    $display("WRITE");
     memory[mem_addr] <= wr_data[7:0];
     memory[mem_addr + 1] <= wr_data[15:8];
     memory[mem_addr + 2] <= wr_data[23:16];
@@ -42,4 +42,5 @@ always_ff @(posedge clk)
     memory[mem_addr + 6] <= wr_data[55:48];
     memory[mem_addr + 7] <= wr_data[63:56];
   end 
+end 
 endmodule
