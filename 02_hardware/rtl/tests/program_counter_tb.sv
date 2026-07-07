@@ -33,6 +33,30 @@ module program_counter_tb;
     assert(pc == 4)
       else $fatal();
 
+    // pc = 8
+    @(posedge clk); #1;
+    assert(pc == 8)
+      else $fatal();
+
+    // pc = 12
+    @(posedge clk); #1;
+    assert(pc == 12)
+      else $fatal();
+
+    // jump to address [100]
+    jump_address = 100;
+    jump_enable = 1;
+    @(posedge clk); #1;
+    assert(pc == 10)
+      else $fatal();
+
+    // clear, pc = 0
+    jump_enable = 0;
+    jump_address = 100;
+    @(posedge clk; #1;
+    assert(pc == 100)
+      else $fatal();
+
     $display("ALL TESTS PASSED.");
     $finish;
   end 
