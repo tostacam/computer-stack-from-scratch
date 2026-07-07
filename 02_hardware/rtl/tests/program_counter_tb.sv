@@ -52,7 +52,7 @@ module program_counter_tb;
 
     // clear, pc = 0
     jump_enable = 0;
-    jump_address = 100;
+    clear = 1;
     @(posedge clk); #1;
     assert(pc == 0)
       else $fatal();
