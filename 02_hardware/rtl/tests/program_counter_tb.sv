@@ -32,6 +32,9 @@ module program_counter_tb;
     @(posedge clk); #1;
     assert(pc == 4)
       else $fatal();
+
+    $display("ALL TESTS PASSED.");
+    $finish;
   end 
 
 endmodule;
