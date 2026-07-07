@@ -26,9 +26,6 @@ module ram_tb;
     wr_enable = 1;
     
     @(posedge clk); #1;
-    
-    $display("Expected = %h", 64'hFF);
-    $display("Actual   = %h", rd_data);
     assert(rd_data == 64'hFF)
       else $fatal();
 
@@ -38,7 +35,6 @@ module ram_tb;
     wr_enable = 1;
     
     @(posedge clk); #1;
-
     assert(rd_data == 64'hAA)
       else $fatal();
 
@@ -48,7 +44,6 @@ module ram_tb;
     wr_enable = 0;
 
     @(posedge clk); #1;
-
     assert(rd_data == 64'hFF)
       else $fatal();
 
@@ -58,7 +53,6 @@ module ram_tb;
     wr_enable = 1;
 
     @(posedge clk); #1;
-
     assert(rd_data == 64'hCC)
       else $fatal();
   
