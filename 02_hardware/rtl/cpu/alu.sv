@@ -21,8 +21,7 @@ module alu(
 );
 
 always_comb begin
-  f_zero = '0;
-  
+  out = '0; 
   case (alu_control)
     ALU_OP_ADD   : out = a + b;
     ALU_OP_SUB   : out = a - b;
@@ -37,8 +36,8 @@ always_comb begin
     ALU_OP_PASS_B: out = b;
     default      : out = '0;
   endcase
-
-  assign f_zero = (out == 64'b0); // zero
 end 
+
+assign f_zero = (out == 64'b0); // zero
 
 endmodule
