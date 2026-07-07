@@ -23,5 +23,10 @@ test_ram:
 	xelab ram_tb -debug typical
 	xsim ram_tb -runall
 
+test_program_counter:
+	xvlog --sv $(CPU_SRC) tests/pc_tb.sv
+	xelab pc_tb -debug typical
+	xsim pc_tb -runall
+
 clean: 
 	rm -rf xsim.dir *.log *.jou *.pb *.wdb *.vcd
