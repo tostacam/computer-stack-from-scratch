@@ -28,5 +28,13 @@ test_program_counter:
 	xelab program_counter_tb -debug typical
 	xsim program_counter_tb -runall
 
+test_cpu:
+	xvlog --sv $(CPU_SRC) $(MEM_SRC) tests/cpu_tb.sv
+	xelab cpu_tb -debug typical
+	xim cpu_tb -runall 
+
+cpu_compile:
+	verilator $(VFLAGS) cpu/cpu.sv $(MEM_SRC)
+
 clean: 
 	rm -rf xsim.dir *.log *.jou *.pb *.wdb *.vcd
