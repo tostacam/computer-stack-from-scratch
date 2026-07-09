@@ -19,11 +19,14 @@ module cpu_tb;
 
     #12;
     reset = 0;
+    $display("PC = 0x%016h Instruction = 0x%08h",
+      u_cpu.pc,
+      u_cpu.instruction);
 
     repeat (6) begin
       @(posedge clk); #1;
       $display("PC = 0x%016h Instruction = 0x%08h",
-        u_cpu.pc
+        u_cpu.pc,
         u_cpu.instruction);
     end 
 
