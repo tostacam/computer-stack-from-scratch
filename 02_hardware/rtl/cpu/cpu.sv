@@ -38,7 +38,9 @@ logic mem_write;
 logic branch;
 logic [1:0] alu_op;
 
-// instantiate modules
+logic alu_opcode alu_control;
+
+// fetch
 program_counter pc_inst(
   .clk(clk),
   .clear(reset),
@@ -52,42 +54,68 @@ rom rom_inst(
   .instruction(instruction)  
 );
 
-// fetch
-
-
-
 // decode
+instruction_decode u_inst_dec(
+  .instruction(instruction),
+  .opcode(opcode),
+  .rd(rd),
+  .funct3(funct3),
+  .rs1(rs1),
+  .rs2(rs2),
+  .funct7(funct7)
+);
 
+register_file u_rf(
+  .clk(clk),
+  .wr_data(),
+  .wr_enable(),
+  .rs1(rs1),
+  .rs2(rs2),
+  .rd(rd),
+  .rd1(rs1_data),
+  .rd2()
+);
 
+immediate_generator u_imm_gen(
+  .instruction(instruction),
+  .immediate(immediate)
+);
+
+control_unit u_ctrl_unit(
+  .opcode(opcode),
+  .alu_src(alu_src),
+  .mem_to_reg(mem_to_reg),
+  .reg_write(reg_write),
+  .mem_read(mem_read),
+  .mem_write(mem_write),
+  .branch(branch),
+  .alu_op(alu_op)
+);
 
 // execute
+alu_control u_alu_ctrl(
+  .alu_op(alu_op),
+  .funct3(funct3),
+  .funct7(funct7),
+  .alu_control(alu_control)
+);
 
-
+alu u_alu(
+  .a(rs1_data),
+  .b(),
+  .alu_control(alu_control),
+  .out(alu_result),
+  .f_zero(alu_zero)
+);
 
 // memory access
-
-
+ram u_ram(
+  .clk(clk),
+  .wr_enable(mem_write),
+  .address(alu_result),
+  .wr_data(rs2_data),
+  .rd_data()
+);
 
 // write back
 
-
-
-
-
-/*
-
-instruction_decoder id_inst();
-
-register_file rf_inst();
-
-immediate_generator ig_inst();
-
-alu_control alu_ctrl_inst();
-
-alu alu_inst();
-
-ram ram_inst();
-
-*/
-
-endmodule 
