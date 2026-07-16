@@ -12,23 +12,41 @@ module cpu_tb;
   initial begin
     clk = 0;
     forever #5 clk = ~clk;
-  end 
+  end
 
   initial begin
     reset = 1;
-
     #12;
     reset = 0;
-    $display("PC = 0x%016h Instruction = 0x%08h",
+
+    $display("-------------------------");
+    $display(" PC    INST        x1  x2  x3   ALU");
+    $display("-------------------------");
+
+    $display("%4d  %08h   %2d  %2d  %2d   %2d",
       u_cpu.pc,
-      u_cpu.instruction);
+      u_cpu.instruction,
+      u_cpu.rf.registers[1],
+      u_cpu.rf.registers[2],
+      u_cpu.rf.registers[3],
+      u_cpu.alu_result
+    );
 
     repeat (6) begin
       @(posedge clk); #1;
-      $display("PC = 0x%016h Instruction = 0x%08h",
+
+      $display("%4d  %08h   %2d  %2d  %2d   %2d",
         u_cpu.pc,
-        u_cpu.instruction);
+        u_cpu.instruction,
+        u_cpu.rf.registers[1],
+        u_cpu.rf.registers[2],
+        u_cpu.rf.registers[3],
+        u_cpu.alu_result
+      );
     end 
+
+    $display("-------------------------");
+    $display("RAM[0] = %0d", u_cpu.ram.memory[0]);
 
     $finish;
   end 
