@@ -3,33 +3,36 @@ module cpu(
   input logic reset  
 );
 
-// fetch
+// fetch: program counter
 logic        clear;
 logic        jump_enable;
 logic [63:0] jump_address;
 logic [63:0] pc;
+/// fetch: instruction memory
 logic [31:0] instruction;
 
-// decode
+// decode: register file
 logic [6:0] opcode;
 logic [4:0] rd;
 logic [2:0] funct3;
 logic [4:0] rs1;
 logic [4:0] rs2;
 logic [6:0] funct7;
-
-// immediate
-logic [63:0] immediate;
-
-// execute
 logic [63:0] rs1_data;
 logic [63:0] rs2_data;
+
+// execute: alu
+logic [63:0] alu_b_input;
 logic        alu_zero;
 logic [63:0] alu_result;
-logic [63:0] ram_data;
-logic [63:0] wr_data;
 
-// control
+// memory access: ram
+logic [63:0] ram_data;
+
+// write back: mux
+logic [63:0] rf_wr_data;
+
+// control: control unit
 logic alu_src;
 logic mem_to_reg;
 logic reg_write;
@@ -37,7 +40,9 @@ logic mem_read;
 logic mem_write;
 logic branch;
 logic [1:0] alu_op;
-
+// control: immediate control unit
+logic [64:0] immediate;
+// control: alu control
 logic alu_opcode alu_control;
 
 // fetch
@@ -67,13 +72,13 @@ instruction_decode u_inst_dec(
 
 register_file u_rf(
   .clk(clk),
-  .wr_data(),
-  .wr_enable(),
+  .wr_data(rf_wr_data),
+  .wr_enable(reg_write),
   .rs1(rs1),
   .rs2(rs2),
   .rd(rd),
   .rd1(rs1_data),
-  .rd2()
+  .rd2(rs2_data)
 );
 
 immediate_generator u_imm_gen(
@@ -100,9 +105,11 @@ alu_control u_alu_ctrl(
   .alu_control(alu_control)
 );
 
+assign alu_b_input = alu_src ? immediate : rs2_data;
+
 alu u_alu(
   .a(rs1_data),
-  .b(),
+  .b(alu_b_input),
   .alu_control(alu_control),
   .out(alu_result),
   .f_zero(alu_zero)
@@ -114,8 +121,8 @@ ram u_ram(
   .wr_enable(mem_write),
   .address(alu_result),
   .wr_data(rs2_data),
-  .rd_data()
+  .rd_data(ram_data)
 );
 
 // write back
-
+assign rf_wr_data = mem_to_reg ? ram_data : alu_result; 
