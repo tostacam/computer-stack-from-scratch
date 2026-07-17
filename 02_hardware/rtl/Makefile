@@ -1,7 +1,7 @@
 PRIM_SRC = primitives/*.sv
 MEM_SRC = memory/*.sv
 CPU_SRC = cpu/*.sv
-VFLAGS = --lint-only -Wno-MULTITOP
+VFLAGS = --lint-only -Icpu -Wno-MULTITOP
 
 test_dff:
 	xvlog --sv $(PRIM_SRC) tests/dff_tb.sv
@@ -34,7 +34,7 @@ test_cpu:
 	xim cpu_tb -runall 
 
 cpu_compile:
-	verilator $(VFLAGS) cpu/cpu.sv $(MEM_SRC)
+	verilator $(VFLAGS) $(CPU_SRC) $(MEM_SRC)
 
 clean: 
 	rm -rf xsim.dir *.log *.jou *.pb *.wdb *.vcd

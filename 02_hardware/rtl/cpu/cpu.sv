@@ -41,9 +41,9 @@ logic mem_write;
 logic branch;
 logic [1:0] alu_op;
 // control: immediate control unit
-logic [64:0] immediate;
+logic [63:0] immediate;
 // control: alu control
-logic alu_opcode alu_control;
+logic [3:0] alu_control;
 
 // fetch
 program_counter pc_inst(
@@ -60,7 +60,7 @@ rom rom_inst(
 );
 
 // decode
-instruction_decode u_inst_dec(
+instruction_decoder u_inst_dec(
   .instruction(instruction),
   .opcode(opcode),
   .rd(rd),
@@ -126,3 +126,5 @@ ram u_ram(
 
 // write back
 assign rf_wr_data = mem_to_reg ? ram_data : alu_result; 
+
+endmodule
