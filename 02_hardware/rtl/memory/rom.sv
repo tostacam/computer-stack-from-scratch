@@ -1,27 +1,21 @@
 module rom #(
   parameter MEM_SIZE = 1024,
-  parameter INST_SIZE = 32
+  parameter ROM_FILE = "tests/program.hex"
 )(
   input  logic [63:0] address,
-  output logic [INST_SIZE-1:0] instruction
+  output logic [31:0] instruction
 );
 
-/*
-// memory
-logic [7:0] memory [0:MEM_SIZE-1];
+logic [31:0] memory [0:MEM_SIZE-1];
+
+initial begin
+  $readmemh(ROM_FILE, memory);
+end 
 
 localparam ADDR_WIDTH = $clog2(MEM_SIZE);
-logic [ADDR_WIDTH-1:0] mem_addr;
-assign mem_addr = address[ADDR_WIDTH-1:0];
+assign instruction = memory[address[ADDR_WIDTH+1:2]];
 
-assign instruction = {
-  memory[mem_addr + 3],  
-  memory[mem_addr + 2],  
-  memory[mem_addr + 1],  
-  memory[mem_addr]
-};
-*/
-
+/*
 always_comb begin
   case (address)
     64'h0000: instruction = 32'h00500093; // addi x1,x0,5
@@ -31,5 +25,6 @@ always_comb begin
     default: instruction = 32'h00000013; // nop
   endcase
 end
+*/
 
 endmodule

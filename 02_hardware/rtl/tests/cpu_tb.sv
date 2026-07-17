@@ -19,9 +19,9 @@ module cpu_tb;
     #12;
     reset = 0;
 
-    $display("-------------------------");
+    $display("-------------------------------------");
     $display(" PC    INST        x1  x2  x3   ALU");
-    $display("-------------------------");
+    $display("-------------------------------------");
 
     $display("%4d  %08h   %2d  %2d  %2d   %2d",
       u_cpu.pc,
@@ -45,7 +45,7 @@ module cpu_tb;
       );
     end 
 
-    $display("-------------------------");
+    $display("-------------------------------------");
     $display("RAM[0] = %0d", u_cpu.u_ram.memory[0]);
 
     $finish;
