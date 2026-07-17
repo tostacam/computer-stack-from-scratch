@@ -26,9 +26,9 @@ module cpu_tb;
     $display("%4d  %08h   %2d  %2d  %2d   %2d",
       u_cpu.pc,
       u_cpu.instruction,
-      u_cpu.rf.registers[1],
-      u_cpu.rf.registers[2],
-      u_cpu.rf.registers[3],
+      u_cpu.u_rf.registers[1],
+      u_cpu.u_rf.registers[2],
+      u_cpu.u_rf.registers[3],
       u_cpu.alu_result
     );
 
@@ -38,15 +38,15 @@ module cpu_tb;
       $display("%4d  %08h   %2d  %2d  %2d   %2d",
         u_cpu.pc,
         u_cpu.instruction,
-        u_cpu.rf.registers[1],
-        u_cpu.rf.registers[2],
-        u_cpu.rf.registers[3],
+        u_cpu.u_rf.registers[1],
+        u_cpu.u_rf.registers[2],
+        u_cpu.u_rf.registers[3],
         u_cpu.alu_result
       );
     end 
 
     $display("-------------------------");
-    $display("RAM[0] = %0d", u_cpu.ram.memory[0]);
+    $display("RAM[0] = %0d", u_cpu.u_ram.memory[0]);
 
     $finish;
   end 
