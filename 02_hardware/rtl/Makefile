@@ -31,7 +31,7 @@ test_program_counter:
 test_cpu:
 	xvlog --sv $(CPU_SRC) $(MEM_SRC) tests/cpu_tb.sv
 	xelab cpu_tb -debug typical
-	xim cpu_tb -runall 
+	xsim cpu_tb -runall 
 
 cpu_compile:
 	verilator $(VFLAGS) $(CPU_SRC) $(MEM_SRC)
