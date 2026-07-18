@@ -1,3 +1,4 @@
+import sys
 from instruction_table import instruction_table
 
 def register_number(register):
@@ -7,17 +8,38 @@ def read_file(input_filename):
   with open(input_filename, "r") as file:
     lines = file.readlines()
 
-  return [line.strip() for line in lines]
+  program = []
+
+  for line in lines:
+    line = line.split("#")[0]
+    line = line.strip()
+
+    if not line:
+      continue
+
+    program.append(line)
+
+  return program
 
 def tokenize(program):
-  return [program_line.replace(",", "").split() for program_line in program]
+  tokens = []
+
+  for line in program:
+    line = line.replace(",", " ")
+    line = line.replace("(", " ")
+    line = line.replace(")", " ")
+    tokens.append(line.split())
+
+  return tokens
 
 def parse(tokens):
   instructions = []
 
   for token in tokens:
     mnemonic = token[0]
-    instruction_type = instruction_table[mnemonic]["type"]
+
+    isa_data = instruction_table[mnemonic]
+    instruction_type = isa_data["type"]
 
     if instruction_type == "R":
       instruction = {
@@ -28,20 +50,29 @@ def parse(tokens):
         "rs2"     : register_number(token[3])
       }
     elif instruction_type == "I":
-      instruction = {
-        "type"    : "I",
-        "mnemonic": mnemonic,
-        "rs1"     : register_number(token[1]),
-        "rs2"     : register_number(token[2]),
-        "imm"     : register_number(token[3])
-      }
+      if isa_data["I-type"] == "arithmetic":
+        instruction = {
+          "type"    : "I",
+          "mnemonic": mnemonic,
+          "rd"      : register_number(token[1]),
+          "rs1"     : register_number(token[2]),
+          "imm"     : int(token[3], 0)
+        }
+      elif isa_data["I-type"] == "offset":
+        instruction = {
+          "type"    : "I",
+          "mnemonic": mnemonic,
+          "rd"      : register_number(token[1]),
+          "imm"     : int(token[2], 0),
+          "rs1"     : register_number(token[3])
+        }
     elif instruction_type == "S":
       instruction = {
         "type"    : "S",
         "mnemonic": mnemonic,
-        "rs1"     : register_number(token[1]),
-        "rs2"     : register_number(token[2]),
-        "imm"     : token[3]
+        "rs2"     : register_number(token[1]),
+        "imm"     : int(token[2], 0),
+        "rs1"     : register_number(token[3])
       }
     elif instruction_type == "B":
       instruction = {
@@ -56,7 +87,7 @@ def parse(tokens):
         "type"    : "U",
         "mnemonic": mnemonic,
         "rd"      : register_number(token[1]),
-        "imm"     : int(token[2])
+        "imm"     : int(token[2], 0)
       }
     elif instruction_type == "J":
       instruction = {
@@ -100,6 +131,9 @@ def encode(instructions):
       rs1     = instruction["rs1"]
       imm     = instruction["imm"]
 
+      if instruction["mnemonic"] == "srai":
+        imm |= 0b0100000 << 5
+
       encoded_instruction = (
         opcode
         | (rd << 7)
@@ -114,8 +148,8 @@ def encode(instructions):
       rs2     = instruction["rs2"]
       imm     = instruction["imm"]
       
-      imm_low  = imm         & 0x1F # bits 4:0
-      imm_high = (immm >> 5) & 0x7F # bits 11:5
+      imm_low  = imm        & 0x1F  # bits 4:0
+      imm_high = (imm >> 5) & 0x7F  # bits 11:5
 
       encoded_instruction = (
         opcode
@@ -182,11 +216,9 @@ def encode(instructions):
 def write_file(output_filename, machine_code):
   with open(output_filename, "w") as file:
     for instruction in machine_code:
-      file.write(f"{instruction:08X}\n")
+      file.write(f"{instruction & 0xFFFFFFFF:08x}\n")
 
-def main():
-  input_filename = "test.s"
-  output_filename = "test.hex"
+def main(input_filename, output_filename):
   program = read_file(input_filename)
   tokens = tokenize(program)
   instructions = parse(tokens)
@@ -194,4 +226,7 @@ def main():
   write_file(output_filename, machine_code);
 
 if __name__ == "__main__":
-  main()
+  if len(sys.argv) != 3:
+    print(f"Need input/output files: python3 {sys.argv[0]} <input.s> <output.hex>")
+    sys.exit(1)
+  main(sys.argv[1], sys.argv[2])

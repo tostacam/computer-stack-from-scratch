@@ -48,6 +48,27 @@ instruction_table = {
     "funct3": 0b101,
     "funct7": 0b0100000,
   },
+  "slli": {
+    "type": "I",
+    "I-type": "arithmetic",
+    "opcode": 0b0010011,
+    "funct3": 0b001,
+    "funct7": 0b0000000,
+  },
+  "srli": {
+    "type": "I",
+    "I-type": "arithmetic",
+    "opcode": 0b0010011,
+    "funct3": 0b101,
+    "funct7": 0b0000000,
+  },
+  "srai": {
+    "type": "I",
+    "I-type": "arithmetic",
+    "opcode": 0b0010011,
+    "funct3": 0b101,
+    "funct7": 0b0100000,
+  },
   "slt": {
     "type"  : "R",
     "opcode": 0b0110011,
@@ -64,46 +85,88 @@ instruction_table = {
   # ---------------- I ----------------
   "addi": {
     "type"  : "I",
+    "I-type": "arithmetic",
     "opcode": 0b0010011,
     "funct3": 0b000,
   },
   "andi": {
     "type"  : "I",
+    "I-type": "arithmetic",
     "opcode": 0b0010011,
     "funct3": 0b111,
   },
   "ori": {
     "type"  : "I",
+    "I-type": "arithmetic",
     "opcode": 0b0010011,
     "funct3": 0b110,
   },
   "xori": {
     "type"  : "I",
+    "I-type": "arithmetic",
     "opcode": 0b0010011,
     "funct3": 0b100,
   },
   "slti": {
     "type"  : "I",
+    "I-type": "arithmetic",
     "opcode": 0b0010011,
     "funct3": 0b010,
   },
   "sltiu": {
     "type"  : "I",
+    "I-type": "arithmetic",
     "opcode": 0b0010011,
     "funct3": 0b011,
   },
+  "lb": {
+    "type"  : "I",
+    "I-type": "offset",
+    "opcode": 0b0000011,
+    "funct3": 0b000,
+  },
+  "lh": {
+    "type"  : "I",
+    "I-type": "offset",
+    "opcode": 0b0000011,
+    "funct3": 0b001,
+  },
   "lw": {
     "type"  : "I",
+    "I-type": "offset",
     "opcode": 0b0000011,
     "funct3": 0b010,
   },
+  "lbu": {
+    "type"  : "I",
+    "I-type": "offset",
+    "opcode": 0b0000011,
+    "funct3": 0b100,
+  },
+  "lhu": {
+    "type"  : "I",
+    "I-type": "offset",
+    "opcode": 0b0000011,
+    "funct3": 0b101,
+  },
   "jalr": {
     "type"  : "I",
+    "I-type": "offset",
     "opcode": 0b1100111,
     "funct3": 0b000,
   },
 
   # ---------------- S ----------------
+  "sb": {
+    "type"  : "S",
+    "opcode": 0b0100011,
+    "funct3": 0b000,
+  },
+  "sh": {
+    "type"  : "S",
+    "opcode": 0b0100011,
+    "funct3": 0b001,
+  },
   "sw": {
     "type"  : "S",
     "opcode": 0b0100011,
