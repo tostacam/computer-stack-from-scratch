@@ -1,23 +1,10 @@
-instruction_table = {
-  "add" : {
-    "type"  : "R",
-    "opcode": 0b0110011, 
-    "funct3": 0b000,
-    "funct7": 0b0000000
-  },
-  "sub" : {
-    "type"  : "R",
-    "opcode": 0b0110011,
-    "funct3": 0b000,
-    "funct7": 0b0100000 
-  }
-}
+from instruction_table import instruction_table
 
 def register_number(register):
   return int(register[1:])
 
-def read_file(filename):
-  with open(filename, "r") as file:
+def read_file(input_filename):
+  with open(input_filename, "r") as file:
     lines = file.readlines()
 
   return [line.strip() for line in lines]
@@ -189,23 +176,22 @@ def encode(instructions):
         | (imm_20 << 31)
       )
 
-    machine_code.append(hex(encoded_instruction))
-
+    machine_code.append(encoded_instruction)
   return machine_code
 
-def write_file(filename, machine_code):
-  print("write file")
+def write_file(output_filename, machine_code):
+  with open(output_filename, "w") as file:
+    for instruction in machine_code:
+      file.write(f"{instruction:08X}\n")
 
 def main():
-  filename = "test.s"
-
-  program = read_file(filename)
+  input_filename = "test.s"
+  output_filename = "test.hex"
+  program = read_file(input_filename)
   tokens = tokenize(program)
   instructions = parse(tokens)
   machine_code = encode(instructions)
-  write_file(filename, machine_code);
-
-  print(machine_code)
+  write_file(output_filename, machine_code);
 
 if __name__ == "__main__":
   main()
