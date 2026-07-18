@@ -17,5 +17,9 @@ xsim.dir/
 *.bin
 *.hex
 
+# python files
+__pycache__/
+*.pyc
+
 # OS
 .DS_Store
