@@ -28,7 +28,7 @@ def run_own_assembler(filename, own_prefix):
     "assembler.py",
     filename,
     f"{own_prefix}.hex"
-  ])
+  ], check = True)
 
 def compare_files(file1, file2):
   with open(file1) as f:
@@ -60,8 +60,8 @@ def main():
 
   filename = sys.argv[1]
 
-  gnu_prefix = "assembler_file_gnu"
-  own_prefix = "assembler_file_own"
+  gnu_prefix = "tests/assembler_file_gnu"
+  own_prefix = "tests/assembler_file_own"
 
   run_gnu_assembler(filename, gnu_prefix)
   run_gnu_assembler(filename, own_prefix)
