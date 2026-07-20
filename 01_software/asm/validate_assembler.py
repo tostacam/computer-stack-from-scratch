@@ -64,7 +64,7 @@ def main():
   own_prefix = "tests/assembler_file_own"
 
   run_gnu_assembler(filename, gnu_prefix)
-  run_gnu_assembler(filename, own_prefix)
+  run_own_assembler(filename, own_prefix)
 
   compare_files(f"{gnu_prefix}.hex", own_prefix)
 
