@@ -19,7 +19,7 @@ def run_gnu_assembler(filename, gnu_prefix):
     for line in result.stdout.splitlines():
       parts = line.split()
       # 0: 003100b3 add x1,x2,x3
-      if len(parts) >= 2 and parts[0].endswith(":"):
+      if len(parts) >= 2 and parts[0].endswith(":") and parts[0][:-1].isalnum():
         file.write(parts[1] + "\n")
 
 def run_own_assembler(filename, own_prefix):
