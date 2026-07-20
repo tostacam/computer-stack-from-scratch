@@ -32,10 +32,25 @@ def tokenize(program):
 
   return tokens
 
-def parse(tokens):
+def first_pass(tokens):
+  symbol_table = []
+  pc = 0
+
+  for token in tokens:
+    if token[0].endswith(":"):
+      symbol_table[token[0].trim(":")] = pc
+    else:
+      pc += 4
+
+  return symbol_table
+
+def parse(tokens, symbol_table):
   instructions = []
 
   for token in tokens:
+    if token[0].endswith(":"):
+      continue
+
     mnemonic = token[0]
 
     isa_data = instruction_table[mnemonic]
@@ -51,7 +66,7 @@ def parse(tokens):
       }
     elif instruction_type == "I":
       if isa_data["I-type"] == "arithmetic":
-        instruction = {
+       instruction = {
           "type"    : "I",
           "mnemonic": mnemonic,
           "rd"      : register_number(token[1]),
@@ -80,7 +95,7 @@ def parse(tokens):
         "mnemonic": mnemonic,
         "rs1"     : register_number(token[1]),
         "rs2"     : register_number(token[2]),
-        "label"   : token[3]
+        "label"   : symbol_table[token[3]]
       }
     elif instruction_type == "U":
       instruction = {
@@ -94,7 +109,7 @@ def parse(tokens):
         "type"    : "J",
         "mnemonic": mnemonic,
         "rd"      : register_number(token[1]),
-        "label"   : token[2]
+        "label"   : symbol_table[token[2]]
       }
 
     instructions.append(instruction)
@@ -219,10 +234,11 @@ def write_file(output_filename, machine_code):
       file.write(f"{instruction & 0xFFFFFFFF:08x}\n")
 
 def main(input_filename, output_filename):
-  program = read_file(input_filename)
-  tokens = tokenize(program)
-  instructions = parse(tokens)
-  machine_code = encode(instructions)
+  program       = read_file(input_filename)
+  tokens        = tokenize(program)
+  symbol_table  = first_pass(tokens)
+  instructions  = parse(tokens, symbol_table)
+  machine_code  = encode(instructions)
   write_file(output_filename, machine_code);
 
 if __name__ == "__main__":
