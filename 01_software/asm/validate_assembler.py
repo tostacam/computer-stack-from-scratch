@@ -4,6 +4,7 @@ import sys
 def run_gnu_assembler(filename, gnu_prefix):
   subprocess.run([
     "riscv64-unknown-elf-as",
+    "-march=rv32i",
     filename,
     "-o",
     f"{gnu_prefix}.o"
@@ -47,7 +48,7 @@ def compare_files(file1, file2):
     if e != a:
       print(f"line {i}")
       print(f" GNU : {e.strip()}")
-      print(f" GNU : {e.strip()}")
+      print(f" OWN : {a.strip()}")
       return
 
   if len(expected) != len(actual):
