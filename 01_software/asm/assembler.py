@@ -33,12 +33,12 @@ def tokenize(program):
   return tokens
 
 def first_pass(tokens):
-  symbol_table = []
+  symbol_table = {}
   pc = 0
 
   for token in tokens:
     if token[0].endswith(":"):
-      symbol_table[token[0].trim(":")] = pc
+      symbol_table[token[0].strip(":")] = pc
     else:
       pc += 4
 
@@ -116,8 +116,9 @@ def parse(tokens, symbol_table):
 
   return instructions
 
-def encode(instructions):
+def encode(instructions, symbol_table):
   machine_code = []
+  pc = 0
 
   for instruction in instructions:
     isa_code = instruction_table[instruction["mnemonic"]]
@@ -179,8 +180,9 @@ def encode(instructions):
       funct3  = isa_code["funct3"]
       rs1     = instruction["rs1"]
       rs2     = instruction["rs2"]
-      imm     = instruction["imm"]
-
+      label   = instruction["label"]
+      
+      imm = label - pc
       imm_12    = (imm >> 12) & 0x1   # bits 12
       imm_10_5  = (imm >> 5)  & 0x3F  # bits 10:5
       imm_4_1   = (imm >> 1)  & 0xF   # bits 4:1
@@ -209,8 +211,9 @@ def encode(instructions):
     elif instruction["type"] == "J":
       opcode  = isa_code["opcode"]
       rd      = instruction["rd"]
-      imm     = instruction["imm"]
+      label   = instruction["label"]
 
+      imm = label - pc
       imm_20    = (imm >> 20) & 0x1   # bits 20
       imm_10_1  = (imm >> 1)  & 0x3FF # bits 10:1
       imm_11    = (imm >> 11) & 0x1   # bits 11
@@ -226,6 +229,7 @@ def encode(instructions):
       )
 
     machine_code.append(encoded_instruction)
+    pc += 4
   return machine_code
 
 def write_file(output_filename, machine_code):
@@ -238,7 +242,7 @@ def main(input_filename, output_filename):
   tokens        = tokenize(program)
   symbol_table  = first_pass(tokens)
   instructions  = parse(tokens, symbol_table)
-  machine_code  = encode(instructions)
+  machine_code  = encode(instructions, symbol_table)
   write_file(output_filename, machine_code);
 
 if __name__ == "__main__":
