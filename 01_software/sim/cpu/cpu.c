@@ -1,6 +1,6 @@
 #include "cpu.h"
 
-void CPU_init(CPU *cpu, ROM *rom) {
+static void CPU_init(CPU *cpu, ROM *rom) {
   program_counter_init(&cpu->pc);
   cpu->rom = *rom;
   register_file_init(&cpu->rf);
@@ -16,9 +16,7 @@ void CPU_init(CPU *cpu, ROM *rom) {
   cpu->control.mem_write  = 0;
   cpu->control.branch     = 0;
   cpu->control.branch_neq = 0;
-  cpu->control.alu_op[0]  = 0;
-  cpu->control.alu_op[1]  = 0;
-  cpu->control.alu_op[2]  = 0;
+  cpu->control.alu_op     = 0;
 }
 
 static void fetch(CPU *cpu) {
@@ -30,95 +28,110 @@ static void fetch(CPU *cpu) {
   cpu->instruction = encode_amount((uint64_t)instr);
 }
 
-static enum alu_op alu_control(bit alu_op[3], uint8_t funct3, uint8_t funct7) {
-  // 000 -> always ADD
-  if (alu_op[2] == 0 && alu_op[1] == 0 && alu_op[0] == 0)
-    return ALU_OP_ADD;
+static enum alu_op alu_control(uint8_t alu_op, uint8_t funct3, uint8_t funct7) {
+  switch (alu_op) {
+    // 000 -> always ADD
+    case 0b000:
+      return ALU_OP_ADD;
 
-  // 001 -> R-type decode
-  if (alu_op[2] == 0 && alu_op[1] == 0 && alu_op[0] == 1) {
-    switch (funct3) {
-      case 0b000: return (funct7 == 0b0100000) ? ALU_OP_SUB : ALU_OP_ADD;
-      case 0b001: return ALU_OP_SLL;
-      case 0b010: return ALU_OP_SLT;
-      case 0b011: return ALU_OP_SLTU;
-      case 0b100: return ALU_OP_XOR;
-      case 0b101: return (funct7 == 0b0100000) ? ALU_OP_SRA : ALU_OP_SRL;
-      case 0b110: return ALU_OP_OR;
-      case 0b111: return ALU_OP_AND;
-    }
+    // 001 -> R-type decode
+    case 0b001:
+      switch (funct3) {
+        case 0b000: return (funct7 == 0b0100000) ? ALU_OP_SUB : ALU_OP_ADD;
+        case 0b001: return ALU_OP_SLL;
+        case 0b010: return ALU_OP_SLT;
+        case 0b011: return ALU_OP_SLTU;
+        case 0b100: return ALU_OP_XOR;
+        case 0b101: return (funct7 == 0b0100000) ? ALU_OP_SRA : ALU_OP_SRL;
+        case 0b110: return ALU_OP_OR;
+        case 0b111: return ALU_OP_AND;
+      }
+      
+    // 010 -> BRANCH compare
+    case 0b010:
+      switch (funct3) {
+        case 0b000:
+        case 0b001: return ALU_OP_SUB;
+        case 0b100:
+        case 0b101: return ALU_OP_SLT;
+        case 0b110:
+        case 0b111: return ALU_OP_SLTU;
+      }
+
+    // 011 -> I-type decode
+    case 0b011:
+      switch (funct3) {
+        case 0b000: return ALU_OP_ADD;
+        case 0b001: return ALU_OP_SLL;
+        case 0b010: return ALU_OP_SLT;
+        case 0b011: return ALU_OP_SLTU;
+        case 0b100: return ALU_OP_XOR;
+        case 0b101: return (funct7 == 0b0100000) ? ALU_OP_SRA : ALU_OP_SRL;
+        case 0b110: return ALU_OP_OR;
+        case 0b111: return ALU_OP_AND;
+      }
+
+    // 100 -> LUI
+    case 0b100:
+      return ALU_OP_PASS_B;
+
+    // 101 -> AUIPC
+    case 0b101:
+      return ALU_OP_ADD;
+
+    // 110 -> JAL/JALR
+    case 0b110:
+      return ALU_OP_ADD;
+
+    // default
+    default:
+      return ALU_OP_ADD;
   }
-    
-  // 010 -> BRANCH compare
-  if (alu_op[2] == 0 && alu_op[1] == 1 && alu_op[0] == 0) {
-    switch (funct3) {
-      case 0b000:
-      case 0b001: return ALU_OP_SUB;
-      case 0b100:
-      case 0b101: return ALU_OP_SLT;
-      case 0b110:
-      case 0b111: return ALU_OP_SLTU;
-    }
-  }
-
-  // 011 -> I-type decode
-  if (alu_op[2] == 0 && alu_op[1] == 1 && alu_op[0] == 1) {
-    switch (funct3) {
-      case 0b000: return ALU_OP_ADD;
-      case 0b001: return ALU_OP_SLL;
-      case 0b010: return ALU_OP_SLT;
-      case 0b011: return ALU_OP_SLTU;
-      case 0b100: return ALU_OP_XOR;
-      case 0b101: return (funct7 == 0b0100000) ? ALU_OP_SRA : ALU_OP_SRL;
-      case 0b110: return ALU_OP_OR;
-      case 0b111: return ALU_OP_AND;
-    }
-  }
-
-  // 100 -> LUI
-  if (alu_op[2] == 1 && alu_op[1] == 0 && alu_op[0] == 0)
-    return ALU_OP_PASS_B;
-
-  // 101 -> AUIPC
-  if (alu_op[2] == 1 && alu_op[1] == 0 && alu_op[0] == 1)
-    return ALU_OP_ADD;
-
-  // 110 -> JAL/JALR
-  if (alu_op[2] == 1 && alu_op[1] == 1 && alu_op[0] == 0)
-    return ALU_OP_ADD;
-
-  // default
-  return ALU_OP_ADD
 }
 
+static bus64 immediate_generator(bus64 instruction) {
+  // opcode
+  uint64_t opcode = decode_nbits(cpu->instruction, 0, 6);
+  uint64_t immediate;
+
+  switch (opcode) {
+    case OPCODE_LOAD:
+    case OPCODE_ITYPE:
+    case OPCODE_JALR: 
+      immediate = decode_nbits(cpu->instruction, 20, 31);
+      break;
+    case OPCODE_STORE: 
+      immediate = (decode_nbits(cpu->instruction, 25, 31) << 5) | decode_nbits(cpu->instruction, 7, 11); 
+      break;
+    case OPCODE_BRANCH:
+      immediate =
+        (decode_nbits(cpu->instruction, 31, 31) << 12) |
+        (decode_nbits(cpu->instruction, 7, 7)   << 11) |
+        (decode_nbits(cpu->instruction, 25, 30) << 5)  |
+        (decode_nbits(cpu->instruction, 8, 11)  << 1);
+      break;
+    case OPCODE_LUI:
+    case OPCODE_AUIPC:
+      immediate = decode_nbits(cpu->instruction, 12, 31);
+      break;
+    case OPCODE_JAL:
+      immediate = 
+        (decode_nbits(cpu->instruction, 31, 31) << 20) |
+        (decode_nbits(cpu->instruction, 12, 19) << 12) |
+        (decode_nbits(cpu->instruction, 20, 20) << 11) |
+        (decode_nbits(cpu->instruction, 21, 30) << 1);
+      break;
+    default:
+      immediate = 0;
+      break;
+  }
+
+  return encode_amount(immediate);
+}
+  
 static void decode(CPU *cpu) {
   // opcode
   uint64_t opcode = decode_nbits(cpu->instruction, 0, 6);
-  
-  // R-type
-  uint64_t rd     = decode_nbits(cpu->instruction, 7, 11);
-  uint64_t funct3 = decode_nbits(cpu->instruction, 12, 14);
-  uint64_t rs1    = decode_nbits(cpu->instruction, 15, 19);
-  uint64_t rs2    = decode_nbits(cpu->instruction, 20, 24);
-  uint64_t funct7 = decode_nbits(cpu->instruction, 25, 31);
-  // I-type
-  uint64_t imm_I_bits = decode_nbits(cpu->instruction, 20, 31);
-  // S-type
-  uint64_t imm_S_bits = (decode_nbits(cpu->instruction, 25, 31) << 5) | decode_nbits(cpu->instruction, 7, 11);
-  // SB-type
-  uint64_t imm_SB_bits =
-    (decode_nbits(cpu->instruction, 31, 31) << 12) |
-    (decode_nbits(cpu->instruction, 7, 7)   << 11) |
-    (decode_nbits(cpu->instruction, 25, 30) << 5)  |
-    (decode_nbits(cpu->instruction, 8, 11)  << 1);
-  // U-type
-  uint64_t imm_U_bits = decode_nbits(cpu->instruction, 12, 31);
-  // UJ-type
-  uint64_t imm_UJ_bits =
-    (decode_nbits(cpu->instruction, 31, 31) << 20) |
-    (decode_nbits(cpu->instruction, 12, 19) << 12) |
-    (decode_nbits(cpu->instruction, 20, 20) << 11) |
-    (decode_nbits(cpu->instruction, 21, 30) << 1);
 
   // Read Registers / Write Register Address
   cpu->rf.read_addr_a = encode_amount(rs1);
@@ -126,109 +139,70 @@ static void decode(CPU *cpu) {
   register_file_eval(&cpu->rf);
   cpu->rf.write_addr  = encode_amount(rd);
 
-  // R-type
-  if (opcode == 0b0110011) {
-    if (funct3 == 0b000) {
-      if (funct7 == 0b0000000) { // add
-        cpu->control.alu_src    = 0;
-        cpu->control.mem_to_reg = 0;
-        cpu->control.reg_write  = 1;
-        cpu->control.mem_read   = 0;
-        cpu->control.mem_write  = 0;
-        cpu->control.branch     = 0;
-        cpu->control.branch_neq = 0;
-        cpu->control.alu_op[0]  = 0;
-        cpu->control.alu_op[1]  = 0;
-        cpu->alu.opcode         = alu_control(cpu->control.alu_op, funct3, funct7);
-      }
-      if (funct3 == 0b0100000) { // sub
-        cpu->control.alu_src    = 0;
-        cpu->control.mem_to_reg = 0;
-        cpu->control.reg_write  = 1;
-        cpu->control.mem_read   = 0;
-        cpu->control.mem_write  = 0;
-        cpu->control.branch     = 0;
-        cpu->control.branch_neq = 0;
-        cpu->control.alu_op[0]  = 1;
-        cpu->control.alu_op[1]  = 0;
-        cpu->alu.opcode         = alu_control(cpu->control.alu_op, funct3, funct7);
-      }
-    }
-  }
+  // default control_signals
+  cpu->control.alu_src    = 0;
+  cpu->control.mem_to_reg = 0;
+  cpu->control.reg_write  = 0;
+  cpu->control.mem_read   = 0;
+  cpu->control.mem_write  = 0;
+  cpu->control.branch     = 0;
+  cpu->control.branch_neq = 0;
+  cpu->control.alu_op     = 0;
 
-  // I-type
-  if (opcode == 0b0000011) {
-    if (funct3 == 0b010) { // lw
+  switch (opcode) {
+    case OPCODE_RTYPE: 
+      cpu->control.reg_write  = 1;
+      cpu->control.alu_op     = 0b001;
+      break;
+    case OPCODE_ITYPE:
+      cpu->control.alu_src    = 1;
+      cpu->control.reg_write  = 1;
+      cpu->control.alu_op     = 0b011;
+      break;
+    case OPCODE_LOAD:
       cpu->control.alu_src    = 1;
       cpu->control.mem_to_reg = 1;
       cpu->control.reg_write  = 1;
       cpu->control.mem_read   = 1;
-      cpu->control.mem_write  = 0;
-      cpu->control.branch     = 0;
-      cpu->control.branch_neq = 0;
-      cpu->control.alu_op[0]  = 0;
-      cpu->control.alu_op[1]  = 0;
-      cpu->alu.opcode         = alu_control(cpu->control.alu_op, funct3, funct7);
-    } 
-  } else if (opcode == 0b0010011) {
-    if (funct3 == 0b000) { // addi
-      cpu->control.alu_src    = 1;
-      cpu->control.mem_to_reg = 0;
-      cpu->control.reg_write  = 1;
-      cpu->control.mem_read   = 0;
-      cpu->control.mem_write  = 0;
-      cpu->control.branch     = 0;
-      cpu->control.branch_neq = 0;
-      cpu->control.alu_op[0]  = 0;
-      cpu->control.alu_op[1]  = 0;
-      cpu->alu.opcode         = alu_control(cpu->control.alu_op, funct3, funct7);
-    }
-  }
-
-  // S-type
-  if (opcode == 0b0100011) {
-    if (funct3 == 0b010) { // sw
-      cpu->control.alu_src    = 1;
-    //cpu->control.mem_to_reg = X;
-      cpu->control.reg_write  = 0;
-      cpu->control.mem_read   = 0;
+      cpu->control.alu_op     = 0b000;
+      break;
+    case OPCODE_STORE:
       cpu->control.mem_write  = 1;
-      cpu->control.branch     = 0;
-      cpu->control.branch_neq = 0;
-      cpu->control.alu_op[0]  = 0;
-      cpu->control.alu_op[1]  = 0;
-      cpu->alu.opcode         = alu_control(cpu->control.alu_op, funct3, funct7);
-    }
+      cpu->control.alu_src    = 1;
+      cpu->control.alu_op     = 0b000;
+      break;
+    case OPCODE_BRANCH:
+      cpu->control.branch     = 1;
+      cpu->control.alu_op     = 0b010;
+      break;
+    case OPCODE_LUI:
+      cpu->control.alu_src    = 1;
+      cpu->control.reg_write  = 1;
+      cpu->control.alu_op     = 0b100;
+      break;
+    case OPCODE_AUIPC:
+      cpu->control.alu_src    = 1;
+      cpu->control.reg_write  = 1;
+      cpu->control.alu_op     = 0b101;
+      break;
+    case OPCODE_JAL:
+      cpu->control.reg_write  = 1;
+      cpu->control.alu_op     = 0b110;
+      break;
+    case OPCODE_JALR:
+      cpu->control.alu_src    = 1;
+      cpu->control.reg_write  = 1;
+      cpu->control.alu_op     = 0b110;
+      break;
+    case OPCODE_SYSTEM:
+      cpu->control.alu_op     = 0b111;
+      break;
   }
 
-  // SB-type
-  if (opcode == 0b1100011) {
-    if (funct3 == 0b000) { // beq
-      cpu->control.alu_src    = 0;
-    //cpu->control.mem_to_reg = X;
-      cpu->control.reg_write  = 0;
-      cpu->control.mem_read   = 0;
-      cpu->control.mem_write  = 0;
-      cpu->control.branch     = 1;
-      cpu->control.branch_neq = 0;
-      cpu->control.alu_op[0]  = 1;
-      cpu->control.alu_op[1]  = 0;
-      cpu->alu.opcode         = alu_control(cpu->control.alu_op, funct3, funct7);
-    } else if (funct3 == 0b001) { // bne
-      cpu->control.alu_src    = 0;
-    //cpu->control.mem_to_reg = X;
-      cpu->control.reg_write  = 0;
-      cpu->control.mem_read   = 0;
-      cpu->control.mem_write  = 0;
-      cpu->control.branch     = 1;
-      cpu->control.branch_neq = 1;
-      cpu->control.alu_op[0]  = 1;
-      cpu->control.alu_op[1]  = 0;
-      cpu->alu.opcode         = alu_control(cpu->control.alu_op, funct3, funct7);
-    }
-  }
+  cpu->alu.opcode = alu_control(cpu->control.alu_op, funct3, funct7);
+  cpu->alu.a      = cpu->rf.read_data_a;
+  cpu->alu.b      = cpu->control.alu_src ? immediate_generator(cpu->instruction) : rf.read_data_b; 
 
-  cpu->alu.a = cpu->rf.read_data_a;
   if (cpu->control.alu_src == 0) {
     cpu->alu.b = cpu->rf.read_data_b;
   } else {
