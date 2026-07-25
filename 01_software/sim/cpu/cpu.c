@@ -203,35 +203,7 @@ static void decode(CPU *cpu) {
   cpu->alu.a      = cpu->rf.read_data_a;
   cpu->alu.b      = cpu->control.alu_src ? immediate_generator(cpu->instruction) : rf.read_data_b; 
 
-  if (cpu->control.alu_src == 0) {
-    cpu->alu.b = cpu->rf.read_data_b;
-  } else {
-    switch (opcode) { // pg. 126, COD: RISC-V
-      case 0b0010011: // I-type (addi)
-      case 0b0000011: // I-type (lw)
-        cpu->alu.b = encode_amount(imm_I_bits);
-        break;
-      case 0b0100011: // S-type (sw)
-        cpu->alu.b = encode_amount(imm_S_bits);
-        break;
-      case 0b1100011: // SB-type
-        cpu->alu.b = encode_amount(imm_SB_bits);
-        break;
-      case 0b0110111: // U-type (lui)
-        cpu->alu.b = encode_amount(imm_U_bits);
-        break;
-      case 0b1101111: // UJ-type (jal)
-        cpu->alu.b = encode_amount(imm_UJ_bits);
-        break;
-    }
-  }
-
-  if (opcode == 0b1100011) { // SB
-    cpu->jump_address = add64_no_crry(register64_output(&cpu->pc.output_reg), encode_amount(imm_SB_bits));
-  }
-  if (opcode == 0b1101111) { // JAL
-    cpu->jump_address = add64_no_crry(register64_output(&cpu->pc.output_reg), encode_amount(imm_UJ_bits));
-  }
+  cpu->jump_address = add64_no_crry(register64_output(&cpu->pc.output_reg), immediate_generator(cpu->instruction));
 }
 
 static void execute(CPU *cpu) {
