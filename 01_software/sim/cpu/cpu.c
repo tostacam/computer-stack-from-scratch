@@ -18,6 +18,7 @@ void CPU_init(CPU *cpu, ROM *rom) {
   cpu->control.branch_neq = 0;
   cpu->control.alu_op[0]  = 0;
   cpu->control.alu_op[1]  = 0;
+  cpu->control.alu_op[2]  = 0;
 }
 
 static void fetch(CPU *cpu) {
@@ -29,27 +30,65 @@ static void fetch(CPU *cpu) {
   cpu->instruction = encode_amount((uint64_t)instr);
 }
 
-static enum alu_op alu_control(bit alu_op[2], uint8_t funct3, uint8_t funct7) {
-  // 00 -> always ADD
-  if (alu_op[1] == 0 && alu_op[0] == 0)
+static enum alu_op alu_control(bit alu_op[3], uint8_t funct3, uint8_t funct7) {
+  // 000 -> always ADD
+  if (alu_op[2] == 0 && alu_op[1] == 0 && alu_op[0] == 0)
     return ALU_OP_ADD;
 
-  // 01 -> always SUB (beq/bne compare)
-  if (alu_op[1] == 0 && alu_op[0] == 1)
-    return ALU_OP_SUB;
-
-  // 10 -> R-type
-  if (alu_op[1] == 1 && alu_op[0] == 0) {
-    // add
-    if (funct3 == 0b000 && funct7 == 0b0000000)
-      return ALU_OP_ADD;
-
-    // sub
-    if (funct3 == 0b000 && funct7 == 0b0100000)
-      return ALU_OP_SUB;
+  // 001 -> R-type decode
+  if (alu_op[2] == 0 && alu_op[1] == 0 && alu_op[0] == 1) {
+    switch (funct3) {
+      case 0b000: return (funct7 == 0b0100000) ? ALU_OP_SUB : ALU_OP_ADD;
+      case 0b001: return ALU_OP_SLL;
+      case 0b010: return ALU_OP_SLT;
+      case 0b011: return ALU_OP_SLTU;
+      case 0b100: return ALU_OP_XOR;
+      case 0b101: return (funct7 == 0b0100000) ? ALU_OP_SRA : ALU_OP_SRL;
+      case 0b110: return ALU_OP_OR;
+      case 0b111: return ALU_OP_AND;
+    }
+  }
+    
+  // 010 -> BRANCH compare
+  if (alu_op[2] == 0 && alu_op[1] == 1 && alu_op[0] == 0) {
+    switch (funct3) {
+      case 0b000:
+      case 0b001: return ALU_OP_SUB;
+      case 0b100:
+      case 0b101: return ALU_OP_SLT;
+      case 0b110:
+      case 0b111: return ALU_OP_SLTU;
+    }
   }
 
-  return ALU_OP_ADD;
+  // 011 -> I-type decode
+  if (alu_op[2] == 0 && alu_op[1] == 1 && alu_op[0] == 1) {
+    switch (funct3) {
+      case 0b000: return ALU_OP_ADD;
+      case 0b001: return ALU_OP_SLL;
+      case 0b010: return ALU_OP_SLT;
+      case 0b011: return ALU_OP_SLTU;
+      case 0b100: return ALU_OP_XOR;
+      case 0b101: return (funct7 == 0b0100000) ? ALU_OP_SRA : ALU_OP_SRL;
+      case 0b110: return ALU_OP_OR;
+      case 0b111: return ALU_OP_AND;
+    }
+  }
+
+  // 100 -> LUI
+  if (alu_op[2] == 1 && alu_op[1] == 0 && alu_op[0] == 0)
+    return ALU_OP_PASS_B;
+
+  // 101 -> AUIPC
+  if (alu_op[2] == 1 && alu_op[1] == 0 && alu_op[0] == 1)
+    return ALU_OP_ADD;
+
+  // 110 -> JAL/JALR
+  if (alu_op[2] == 1 && alu_op[1] == 1 && alu_op[0] == 0)
+    return ALU_OP_ADD;
+
+  // default
+  return ALU_OP_ADD
 }
 
 static void decode(CPU *cpu) {
