@@ -39,7 +39,7 @@ logic reg_write;
 logic mem_read;
 logic mem_write;
 logic branch;
-logic [1:0] alu_op;
+logic [2:0] alu_op;
 // control: immediate control unit
 logic [63:0] immediate;
 // control: alu control
