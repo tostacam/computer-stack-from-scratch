@@ -23,7 +23,7 @@ always_comb begin
         3'b010: alu_control = `ALU_OP_SLT;                                        // SLT
         3'b011: alu_control = `ALU_OP_SLTU;                                       // SLTU
         3'b100: alu_control = `ALU_OP_XOR;                                        // XOR
-        3'b101: alu_control = (funct7 == 7'b0100000) ? `ALU_OP_SRA : ALU_OP_SRL;  // SRL, SRA
+        3'b101: alu_control = (funct7 == 7'b0100000) ? `ALU_OP_SRA : `ALU_OP_SRL; // SRL, SRA
         3'b110: alu_control = `ALU_OP_OR;                                         // OR
         3'b111: alu_control = `ALU_OP_AND;                                        // AND
       endcase
@@ -38,6 +38,7 @@ always_comb begin
         3'b101: alu_control = `ALU_OP_SLT;  // BGE
         3'b110,                             // BLTU
         3'b111: alu_control = `ALU_OP_SLTU; // BGEU
+        default: alu_control = '0;
       endcase
     end 
 
@@ -52,6 +53,7 @@ always_comb begin
         3'b101: alu_control = (funct7 == 7'b0100000) ? `ALU_OP_SRA : `ALU_OP_SRL; // SRLI, SRAI
         3'b110: alu_control = `ALU_OP_OR;                                         // ORI
         3'b111: alu_control = `ALU_OP_AND;                                        // ANDI
+      endcase
     end 
     
     // 100 -> LUI
@@ -64,6 +66,9 @@ always_comb begin
 
     // 110 -> JAL/JALR
     3'b110: 
+      alu_control = `ALU_OP_ADD;
+
+    default:
       alu_control = `ALU_OP_ADD;
 
   endcase 

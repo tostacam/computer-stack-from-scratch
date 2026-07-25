@@ -12,14 +12,14 @@ logic [63:0] pc;
 logic [31:0] instruction;
 
 // decode: register file
-logic [6:0] opcode;
-logic [4:0] rd;
-logic [2:0] funct3;
-logic [4:0] rs1;
-logic [4:0] rs2;
-logic [6:0] funct7;
-logic [63:0] rs1_data;
-logic [63:0] rs2_data;
+logic [6:0]   opcode;
+logic [4:0]   rd;
+logic [2:0]   funct3;
+logic [4:0]   rs1;
+logic [4:0]   rs2;
+logic [6:0]   funct7;
+logic [63:0]  rs1_data;
+logic [63:0]  rs2_data;
 
 // execute: alu
 logic [63:0] alu_b_input;
@@ -33,12 +33,12 @@ logic [63:0] ram_data;
 logic [63:0] rf_wr_data;
 
 // control: control unit
-logic alu_src;
-logic mem_to_reg;
-logic reg_write;
-logic mem_read;
-logic mem_write;
-logic branch;
+logic       alu_src;
+logic       mem_to_reg;
+logic       reg_write;
+logic       mem_read;
+logic       mem_write;
+logic       branch;
 logic [2:0] alu_op;
 // control: immediate control unit
 logic [63:0] immediate;
@@ -124,7 +124,16 @@ ram u_ram(
   .rd_data(ram_data)
 );
 
-// write back
+// write back 
 assign rf_wr_data = mem_to_reg ? ram_data : alu_result; 
+
+// update pc
+branch_control u_branch_ctrl(
+  .branch(branch),
+  .funct3(funct3),
+  .alu_zero(alu_zero),
+  .alu_result(alu_result),
+  .jump_enable(jump_enable)  
+);
 
 endmodule

@@ -65,7 +65,7 @@ always_comb begin
     end
 
     // AUIPC
-    `OPCODE_AUIPIC: begin
+    `OPCODE_AUIPC: begin
       alu_src   = 1;
       reg_write = 1;
       alu_op    = 3'b101;
