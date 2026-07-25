@@ -1,3 +1,5 @@
+`include "control_opcodes.svh"
+
 module control_unit(
   input  logic [6:0] opcode,
   output logic alu_src,
@@ -21,47 +23,72 @@ always_comb begin
 
   case (opcode)
     // R-Type (ADD, SUB, AND, OR, ...)
-    7'b0110011: begin
-      alu_src    = 0;
-      reg_write  = 1;
+    `OPCODE_RTYPE: begin
+      reg_write = 1;
+      alu_op    = 3'b001;
     end
 
     // I-Type Arithmetic (ADDI, ANDI, ...)
-    7'b0010011: begin
-      alu_src    = 1;
-      reg_write  = 1;
+    `OPCODE_ITYPE: begin
+      alu_src   = 1;
+      reg_write = 1;
+      alu_op    = 3'b011;
     end
 
     // LOAD
-    7'b0000011: begin
+    `OPCODE_LOAD: begin
       alu_src    = 1;
       mem_to_reg = 1;
       reg_write  = 1;
       mem_read   = 1;
+      alu_op     = 3'b000;
     end
 
     // STORE
-    7'b0100011: begin
+    `OPCODE_STORE: begin
       mem_write = 1;
       alu_src   = 1;
+      alu_op    = 3'b000;
     end
 
     // BRANCH
-    7'b1100011: begin
-      branch = 1;
+    `OPCODE_BRANCH: begin
+      branch  = 1;
+      alu_op  = 3'b010;
     end
 
    // LUI
-    7'b0110111: begin
-      alu_src = 1;
+    `OPCODE_LUI: begin
+      alu_src   = 1;
       reg_write = 1;
+      alu_op    = 3'b100;
     end
 
     // AUIPC
-    7'b0010111: begin
-      alu_src = 1;
+    `OPCODE_AUIPIC: begin
+      alu_src   = 1;
       reg_write = 1;
+      alu_op    = 3'b101;
     end
+
+    // JAL
+    `OPCODE_JAL: begin
+      reg_write = 1;
+      alu_op    = 3'b110;
+    end
+
+    // JALR
+    `OPCODE_JALR: begin
+      alu_src   = 1;
+      reg_write = 1;
+      alu_op    = 3'b110;
+    end
+
+    // SYSTEM
+    `OPCODE_SYSTEM: begin
+      alu_op    = `OPCODE_SYSTEM;
+    end 
+
     default: begin
     end
   endcase 
