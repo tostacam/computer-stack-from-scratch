@@ -1,6 +1,6 @@
 #include "cpu.h"
 
-static void CPU_init(CPU *cpu, ROM *rom) {
+void CPU_init(CPU *cpu, ROM *rom) {
   program_counter_init(&cpu->pc);
   cpu->rom = *rom;
   register_file_init(&cpu->rf);
@@ -91,35 +91,35 @@ static enum alu_op alu_control(uint8_t alu_op, uint8_t funct3, uint8_t funct7) {
 
 static bus64 immediate_generator(bus64 instruction) {
   // opcode
-  uint64_t opcode = decode_nbits(cpu->instruction, 0, 6);
+  uint64_t opcode = decode_nbits(instruction, 0, 6);
   uint64_t immediate;
 
   switch (opcode) {
     case OPCODE_LOAD:
     case OPCODE_ITYPE:
     case OPCODE_JALR: 
-      immediate = decode_nbits(cpu->instruction, 20, 31);
+      immediate = decode_nbits(instruction, 20, 31);
       break;
     case OPCODE_STORE: 
-      immediate = (decode_nbits(cpu->instruction, 25, 31) << 5) | decode_nbits(cpu->instruction, 7, 11); 
+      immediate = (decode_nbits(instruction, 25, 31) << 5) | decode_nbits(instruction, 7, 11); 
       break;
     case OPCODE_BRANCH:
       immediate =
-        (decode_nbits(cpu->instruction, 31, 31) << 12) |
-        (decode_nbits(cpu->instruction, 7, 7)   << 11) |
-        (decode_nbits(cpu->instruction, 25, 30) << 5)  |
-        (decode_nbits(cpu->instruction, 8, 11)  << 1);
+        (decode_nbits(instruction, 31, 31) << 12) |
+        (decode_nbits(instruction, 7, 7)   << 11) |
+        (decode_nbits(instruction, 25, 30) << 5)  |
+        (decode_nbits(instruction, 8, 11)  << 1);
       break;
     case OPCODE_LUI:
     case OPCODE_AUIPC:
-      immediate = decode_nbits(cpu->instruction, 12, 31);
+      immediate = decode_nbits(instruction, 12, 31);
       break;
     case OPCODE_JAL:
       immediate = 
-        (decode_nbits(cpu->instruction, 31, 31) << 20) |
-        (decode_nbits(cpu->instruction, 12, 19) << 12) |
-        (decode_nbits(cpu->instruction, 20, 20) << 11) |
-        (decode_nbits(cpu->instruction, 21, 30) << 1);
+        (decode_nbits(instruction, 31, 31) << 20) |
+        (decode_nbits(instruction, 12, 19) << 12) |
+        (decode_nbits(instruction, 20, 20) << 11) |
+        (decode_nbits(instruction, 21, 30) << 1);
       break;
     default:
       immediate = 0;
@@ -130,8 +130,13 @@ static bus64 immediate_generator(bus64 instruction) {
 }
   
 static void decode(CPU *cpu) {
-  // opcode
+  // opcode, regsiters, funct3/7
   uint64_t opcode = decode_nbits(cpu->instruction, 0, 6);
+  uint64_t rd     = decode_nbits(cpu->instruction, 7, 11);
+  uint64_t funct3 = decode_nbits(cpu->instruction, 12, 14);
+  uint64_t rs1    = decode_nbits(cpu->instruction, 15, 19);
+  uint64_t rs2    = decode_nbits(cpu->instruction, 20, 24);
+  uint64_t funct7 = decode_nbits(cpu->instruction, 25, 31);
 
   // Read Registers / Write Register Address
   cpu->rf.read_addr_a = encode_amount(rs1);
@@ -201,7 +206,7 @@ static void decode(CPU *cpu) {
 
   cpu->alu.opcode = alu_control(cpu->control.alu_op, funct3, funct7);
   cpu->alu.a      = cpu->rf.read_data_a;
-  cpu->alu.b      = cpu->control.alu_src ? immediate_generator(cpu->instruction) : rf.read_data_b; 
+  cpu->alu.b      = cpu->control.alu_src ? immediate_generator(cpu->instruction) : cpu->rf.read_data_b; 
 
   cpu->jump_address = add64_no_crry(register64_output(&cpu->pc.output_reg), immediate_generator(cpu->instruction));
 }
