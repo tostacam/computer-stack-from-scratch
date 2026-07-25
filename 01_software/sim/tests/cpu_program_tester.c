@@ -14,15 +14,19 @@ void load_expected(CPU_expected *expected, const char *filename);
 void CPU_run(CPU *cpu);
 void verify(CPU *cpu, CPU_expected *expected);
 
-int main(){
+int main(int argc, char *argv[]){
+  if (argc != 3) {
+    printf("Need input file: <program> <filename.hex> <filename.exp>\n");
+    return 1;
+  }
   
   // Load progam into ROM
   ROM rom;
-  load_program(&rom, "tests/programs/bne.txt");
+  load_program(&rom, argv[1]);
 
   // Load ecpted results
   CPU_expected expected = {0};
-  load_expected(&expected, "tests/programs/bne.exp");
+  load_expected(&expected, argv[2]);
 
   // Run CPU
   CPU cpu;

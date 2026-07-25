@@ -60,6 +60,7 @@ test_rom:
 
 cpu_tester:
 	$(CC) $(CFLAGS) tests/cpu_program_tester.c $(LOGIC_SRCS) $(CIRCUITS_SRCS) $(CPU_SRCS) $(TEST_UTIL) $(MEM_SRCS) -o tests/cpu_program_tester
+		./tests/cpu_program_tester tests/programs/bne.txt tests/programs/bne.exp
 
 clean:
 	rm -f tests/test_nand tests/test_gates tests/test_bus tests/test_adders tests/test_mux \
