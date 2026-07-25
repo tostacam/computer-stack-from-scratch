@@ -8,7 +8,7 @@ module control_unit(
   output logic mem_read,
   output logic mem_write,
   output logic branch,
-  output logic [1:0] alu_op 
+  output logic [2:0] alu_op 
 );
 
 always_comb begin
@@ -86,7 +86,7 @@ always_comb begin
 
     // SYSTEM
     `OPCODE_SYSTEM: begin
-      alu_op    = `OPCODE_SYSTEM;
+      alu_op    = 3'b111;
     end 
 
     default: begin
