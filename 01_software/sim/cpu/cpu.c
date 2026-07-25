@@ -15,7 +15,6 @@ void CPU_init(CPU *cpu, ROM *rom) {
   cpu->control.mem_read   = 0;
   cpu->control.mem_write  = 0;
   cpu->control.branch     = 0;
-  cpu->control.branch_neq = 0;
   cpu->control.alu_op     = 0;
 }
 
@@ -151,7 +150,6 @@ static void decode(CPU *cpu) {
   cpu->control.mem_read   = 0;
   cpu->control.mem_write  = 0;
   cpu->control.branch     = 0;
-  cpu->control.branch_neq = 0;
   cpu->control.alu_op     = 0;
 
   switch (opcode) {
@@ -235,9 +233,32 @@ static void write_back(CPU *cpu) {
 
 static void update_pc(CPU *cpu) {
   cpu->pc.jump_addr = cpu->jump_address;
+  
   if (cpu->control.branch) {
-    cpu->pc.jump = cpu->control.branch_neq ? !cpu->alu.f_zero : cpu->alu.f_zero;
+    uint8_t funct3 = decode_nbits(cpu->instruction, 12, 14);
+
+    switch (funct3) {
+      case FUNCT3_BEQ:
+        cpu->pc.jump = cpu->alu.f_zero;
+        break;
+      case FUNCT3_BNE:
+        cpu->pc.jump = !cpu->alu.f_zero;
+        break;
+      case FUNCT3_BLT:
+        cpu->pc.jump = (decode_amount(cpu->alu.output) == 1);
+        break;
+      case FUNCT3_BGE:
+        cpu->pc.jump = (decode_amount(cpu->alu.output) == 0);
+        break;
+      case FUNCT3_BLTU:
+        cpu->pc.jump = (decode_amount(cpu->alu.output) == 1);
+        break;
+      case FUNCT3_BGEU:
+        cpu->pc.jump = (decode_amount(cpu->alu.output) == 0);
+        break;
+    }
   }
+
   program_counter_tick(&cpu->pc);
 }
 

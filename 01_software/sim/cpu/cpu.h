@@ -23,6 +23,15 @@ enum control_opcodes {
   OPCODE_SYSTEM = 0b1110011
 };
 
+enum branch_codes {
+  FUNCT3_BEQ  = 0b000,
+  FUNCT3_BNE  = 0b001,
+  FUNCT3_BLT  = 0b100,
+  FUNCT3_BGE  = 0b101,
+  FUNCT3_BLTU = 0b110,
+  FUNCT3_BGEU = 0b111
+};
+
 typedef struct {
   bit     alu_src;
   bit     mem_to_reg;
@@ -30,7 +39,6 @@ typedef struct {
   bit     mem_read;
   bit     mem_write;
   bit     branch;
-  bit     branch_neq;
   uint8_t alu_op;
 } control_signals;
 
