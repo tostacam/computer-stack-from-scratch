@@ -51,6 +51,10 @@ void CPU_run(CPU *cpu) {
   }
 }
 
+int ram_data(CPU *cpu, int address) {
+  return cpu->ram.bytes[address] | (cpu->ram.bytes[address] << 8) | (cpu->ram.bytes[address] << 16) | (cpu->ram.bytes[address] << 24);
+}
+
 void output_results(CPU *cpu, const char* filename) {
   FILE *fp = fopen(filename, "w");
 
@@ -62,7 +66,10 @@ void output_results(CPU *cpu, const char* filename) {
   }
   fprintf(fp, "  },\n");
   fprintf(fp, "  \"memory\": {\n");
-  fprintf(fp, "    \"0x0000\": %d\n", cpu->ram.bytes[0] | (cpu->ram.bytes[1] << 8) | (cpu->ram.bytes[2] << 16) | (cpu->ram.bytes[3] << 24));
+  fprintf(fp, "    \"0x0000\": %d,\n", ram_data(cpu, 0));
+  fprintf(fp, "    \"0x0004\": %d,\n", ram_data(cpu, 4));
+  fprintf(fp, "    \"0x0008\": %d,\n", ram_data(cpu, 8));
+  fprintf(fp, "    \"0x000C\": %d\n", ram_data(cpu, 12));
   fprintf(fp, "  }\n");
   fprintf(fp, "}\n");
 
