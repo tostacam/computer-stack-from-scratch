@@ -22,5 +22,12 @@ __pycache__/
 *.pyc
 .*.swp
 
+# executable C files
+01_software/sim/tools/run_cpu
+
+# validation/test files
+01_software/sim/tools/*.sim.json
+03_validation/results
+
 # OS
 .DS_Store
