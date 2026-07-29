@@ -29,5 +29,8 @@ __pycache__/
 01_software/sim/tools/*.sim.json
 03_validation/results
 
+# verilator files
+02_hardware/rtl/obj_dir
+
 # OS
 .DS_Store

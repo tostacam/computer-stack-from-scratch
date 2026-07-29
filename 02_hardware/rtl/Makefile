@@ -36,5 +36,13 @@ test_cpu:
 cpu_compile:
 	verilator $(VFLAGS) $(CPU_SRC) $(MEM_SRC)
 
+cpu_object:
+	verilator \
+    -Icpu \
+    --cc $(CPU_SRC) $(MEM_SRC) \
+    --top-module cpu \
+    --exe tools/run_rtl.cpp \
+    --build
+
 clean: 
 	rm -rf xsim.dir *.log *.jou *.pb *.wdb *.vcd
