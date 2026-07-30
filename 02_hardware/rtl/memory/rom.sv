@@ -1,6 +1,6 @@
 module rom #(
   parameter MEM_SIZE = 1024,
-  parameter ROM_FILE = "tests/program.hex"
+  parameter ROM_FILE = "tools/add.hex"
 )(
   input  logic [63:0] address,
   output logic [31:0] instruction
