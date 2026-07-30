@@ -1,6 +1,9 @@
 module cpu(
   input logic clk,
-  input logic reset  
+  input logic reset,
+
+  output logic [63:0] debug_pc,
+  output logic [31:0] debug_instruction
 );
 
 // fetch: program counter
@@ -135,5 +138,9 @@ branch_control u_branch_ctrl(
   .alu_result(alu_result),
   .jump_enable(jump_enable)  
 );
+
+// debug signals
+assign debug_pc = pc;
+assign debug_instruction = instruction;
 
 endmodule
