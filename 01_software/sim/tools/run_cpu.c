@@ -11,7 +11,7 @@ void output_results(CPU *cpu, const char *filename);
 
 int main(int argc, char *argv[]) {
   if (argc != 3) {
-    printf("Need input/output file: <program.c> <filename.hex> <filename.json>\n");
+    printf("Need input/output file: <program.c> <input.hex> <output.json>\n");
     return 1;
   }
 
