@@ -3,7 +3,9 @@ module cpu(
   input logic reset,
 
   output logic [63:0] debug_pc,
-  output logic [31:0] debug_instruction
+  output logic [31:0] debug_instruction,
+  output logic [63:0] debug_rf [31:0],
+  output logic  [7:0] debug_ram [4096-1:0]
 );
 
 // fetch: program counter
@@ -142,5 +144,7 @@ branch_control u_branch_ctrl(
 // debug signals
 assign debug_pc = pc;
 assign debug_instruction = instruction;
+assign debug_rf = u_rf.registers;
+assign debug_ram = u_ram.memory;
 
 endmodule
