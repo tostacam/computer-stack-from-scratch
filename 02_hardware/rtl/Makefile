@@ -34,9 +34,6 @@ test_cpu:
 	xsim cpu_tb -runall 
 
 cpu_compile:
-	verilator $(VFLAGS) $(CPU_SRC) $(MEM_SRC)
-
-cpu_object:
 	verilator \
     -Icpu \
     --cc $(CPU_SRC) $(MEM_SRC) \
