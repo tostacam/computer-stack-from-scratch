@@ -14,6 +14,7 @@ int main(int argc, char *argv[]) {
   }
 
   // CPU init
+  Verilated::commandArgs(argc, argv);
   Vcpu cpu;
   reset(&cpu);
 
@@ -78,7 +79,7 @@ void output_results(Vcpu *cpu, const char *filename) {
   fprintf(fp, "    \"0x0000\": %d,\n", ram_word(cpu, 0));
   fprintf(fp, "    \"0x0004\": %d,\n", ram_word(cpu, 4));
   fprintf(fp, "    \"0x0008\": %d,\n", ram_word(cpu, 8));
-  fprintf(fp, "    \"0x000C\": %d,\n", ram_word(cpu, 12));
+  fprintf(fp, "    \"0x000C\": %d\n", ram_word(cpu, 12));
   fprintf(fp, "  }\n");
   fprintf(fp, "}\n");
   fclose(fp);
