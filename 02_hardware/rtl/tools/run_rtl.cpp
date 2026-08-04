@@ -4,12 +4,12 @@
 
 void tick(Vcpu *cpu);
 void reset(Vcpu *cpu);
-void CPU_run(Vcpu *cpu);
+void CPU_run(Vcpu *cpu, int cycles);
 void output_results(Vcpu *cpu, const char *filename);
 
 int main(int argc, char *argv[]) {
-  if (argc != 3) {
-    printf("Need input/output file: <program.cpp> <input.hex> <output.json>");
+  if (argc != 4) {
+    printf("Need input/output file: <program.cpp> +ROM=<input.hex> +CYCLES=n <output.json>\n");
     return 1;
   }
 
@@ -19,10 +19,12 @@ int main(int argc, char *argv[]) {
   reset(&cpu);
 
   // CPU run
-  CPU_run(&cpu);
+  int cycles = 0;
+  sscanf(argv[2], "+CYCLES=%d", &cycles);
+  CPU_run(&cpu, cycles);
 
   // Output
-  output_results(&cpu, argv[2]);
+  output_results(&cpu, argv[3]);
 }
 
 void tick(Vcpu *cpu) {
@@ -40,18 +42,21 @@ void reset(Vcpu *cpu) {
   cpu->reset = 0;
 }
 
-void CPU_run(Vcpu *cpu) {
+void CPU_run(Vcpu *cpu, int cycles) {
+  /*  
   std::cout << "PC: " << cpu->debug_pc
     << ", INST: " << std::hex << cpu->debug_instruction
     << std::dec << "\n";
+  */
 
-  for (int i = 0; i < 3; i++) {
+  while ((cpu->debug_pc/4) < cycles) {
     tick(cpu);
-
+    /*
     std::cout << "PC: " << cpu->debug_pc
       << ", INST: " << std::hex << cpu->debug_instruction
       << std::dec << "\n";
-  } 
+    */
+  }
 }
 
 int ram_word(Vcpu *cpu, int i) {
@@ -72,7 +77,7 @@ void output_results(Vcpu *cpu, const char *filename) {
   fprintf(fp, "  \"pc\": %llu,\n", cpu->debug_pc);
   fprintf(fp, "  \"registers\": {\n");
   for (int i = 0; i < 32; ++i) {
-    fprintf(fp, "    \"x%d\": %llu%s\n", i, cpu->debug_rf[i], (i == 31) ? "" : ",");
+    fprintf(fp, "    \"x%d\": %llu%s\n", i, cpu->debug_rf[31-i], (i == 31) ? "" : ",");
   }
   fprintf(fp, "  },\n");
   fprintf(fp, "  \"memory\": {\n");
