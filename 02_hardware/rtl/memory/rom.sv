@@ -12,7 +12,7 @@ string rom_file;
 initial begin
   if (!$value$plusargs("ROM=%s", rom_file))
     rom_file = "tools/add.hex"; // default, just in case
-  $display("Loading ROM: %s", rom_file);
+  //$display("Loading ROM: %s", rom_file);
   $readmemh(rom_file, memory);
 end 
 
