@@ -63,6 +63,11 @@ def compare(expected_file, result_file):
 
   return True
 
+def test_status(passed):
+  if passed:
+    return f"{GREEN}✓ PASS{RESET}"
+  return f"{RED}✗ FAIL{RESET}"
+
 def main():
   # creating folders
   HEX_FILES.mkdir(parents=True, exist_ok=True)
@@ -70,6 +75,10 @@ def main():
 
   tests_total  = 0
   tests_passed = 0
+
+  print("\n" + "-" * 34)
+  print(f"{'Program':<12} {CYAN}{'SIM':<10} {PINK}{'RTL':<10}{RESET}")
+  print("-" * 34)
 
   # running all tests
   for test in PROGRAMS.glob("*.s"):
@@ -83,30 +92,28 @@ def main():
     sim_pass = compare(
       PROGRAMS / f"{base}.expected.json", 
       RESULTS / f"{base}.sim.json")
-
-    tests_total += 1
+    tests_total  += 1
     if sim_pass:
       tests_passed += 1
-      print(f"{GREEN}PASS {PINK}[SIM] {base}")
-    else:
-      print(f"{RED}FAIL {PINK}[SIM] {base}")
 
     # rtl
     run_rtl(base)
     rtl_pass = compare(
       PROGRAMS / f"{base}.expected.json", 
       RESULTS / f"{base}.rtl.json")
-    
-    tests_total += 1
+    tests_total  += 1
     if rtl_pass:
       tests_passed += 1
-      print(f"{GREEN}PASS {CYAN}[RTL] {base}")
-    else:
-      print(f"{RED}FAIL {CYAN}[RTL] {base}")
+
+    print(f"{base:<10} {test_status(sim_pass)}     {test_status(rtl_pass)}")
   
   percentage = 100 * tests_passed / tests_total
   color = GREEN if tests_passed == tests_total else RED
+  print("-" * 34)
   print(f"{color}Summary: {tests_passed}/{tests_total} tests passed ({percentage:.1f}%){RESET}")
+  print("-" * 34 + "\n")
 
 if __name__ == "__main__":
   main()
+
+#✓✗
