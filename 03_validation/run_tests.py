@@ -11,6 +11,8 @@ PROGRAMS  = ROOT / "03_validation" / "programs"
 HEX_FILES = ROOT / "03_validation" / "hex_files"
 RESULTS   = ROOT / "03_validation" / "results"
 
+MASK_64BIT = 0xFFFFFFFFFFFFFFFF
+
 RED   = "\033[31m"
 GREEN = "\033[32m"
 PINK  = "\033[35m"
@@ -53,11 +55,11 @@ def compare(expected_file, result_file):
 
   # Registers
   for reg, val in expected.get("registers", {}).items():
-    if result["registers"][reg] != val:
+    if (result["registers"][reg] & MASK_64BIT) != (val & MASK_64BIT):
       return False
 
   # Memory
-  for addr, value, in expected.get("memory", {}).items():
+  for addr, val, in expected.get("memory", {}).items():
     if result["memory"][addr] != val:
       return False
 
