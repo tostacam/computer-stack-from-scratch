@@ -11,6 +11,12 @@ PROGRAMS  = ROOT / "03_validation" / "programs"
 HEX_FILES = ROOT / "03_validation" / "hex_files"
 RESULTS   = ROOT / "03_validation" / "results"
 
+RED   = "\033[31m"
+GREEN = "\033[32m"
+PINK  = "\033[35m"
+CYAN  = "\033[36m"
+RESET = "\033[0m"
+
 def assemble(base):
   subprocess.run([
     "python3",
@@ -27,9 +33,12 @@ def run_sim(base):
   ]) 
 
 def run_rtl(base):
+  num_instr = sum(1 for line in open(f"{HEX_FILES}/{base}.hex") if line.strip())
+
   subprocess.run([
     RTL,
     f"+ROM={HEX_FILES}/{base}.hex",
+    f"+CYCLES={num_instr}",
     RESULTS / f"{base}.rtl.json"
   ])
 
@@ -78,9 +87,9 @@ def main():
     tests_total += 1
     if sim_pass:
       tests_passed += 1
-      print(f"PASS [SIM] {base}")
+      print(f"{GREEN}PASS {PINK}[SIM] {base}")
     else:
-      print(f"FAIL [SIM] {base}")
+      print(f"{RED}FAIL {PINK}[SIM] {base}")
 
     # rtl
     run_rtl(base)
@@ -91,12 +100,13 @@ def main():
     tests_total += 1
     if rtl_pass:
       tests_passed += 1
-      print(f"PASS [RTL] {base}")
+      print(f"{GREEN}PASS {CYAN}[RTL] {base}")
     else:
-      print(f"FAIL [RTL] {base}")
+      print(f"{RED}FAIL {CYAN}[RTL] {base}")
   
   percentage = 100 * tests_passed / tests_total
-  print(f"Summary: {tests_passed}/{tests_total} tests passed ({percentage:.1f}%)")
+  color = GREEN if tests_passed == tests_total else RED
+  print(f"{color}Summary: {tests_passed}/{tests_total} tests passed ({percentage:.1f}%){RESET}")
 
 if __name__ == "__main__":
   main()
