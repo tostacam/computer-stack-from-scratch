@@ -9,22 +9,26 @@ module branch_control(
 );
 
 always_comb begin
-  case (funct3)
-    `FUNCT3_BEQ:
-      jump_enable = alu_zero;
-    `FUNCT3_BNE:
-      jump_enable = !alu_zero;
-    `FUNCT3_BLT:
-      jump_enable = (alu_result == 1);
-    `FUNCT3_BGE:
-      jump_enable = (alu_result == 0);
-    `FUNCT3_BLTU:
-      jump_enable = (alu_result == 1);
-    `FUNCT3_BGEU:
-      jump_enable = (alu_result == 0);
-    default:
-      jump_enable = 0;
-  endcase 
+  jump_enable = 0;
+
+  if (branch) begin
+    case (funct3)
+      `FUNCT3_BEQ:
+        jump_enable = alu_zero;
+      `FUNCT3_BNE:
+        jump_enable = !alu_zero;
+      `FUNCT3_BLT:
+        jump_enable = (alu_result == 1);
+      `FUNCT3_BGE:
+        jump_enable = (alu_result == 0);
+      `FUNCT3_BLTU:
+        jump_enable = (alu_result == 1);
+      `FUNCT3_BGEU:
+        jump_enable = (alu_result == 0);
+      default:
+        jump_enable = 0;
+    endcase 
+  end
 end
 
 endmodule
