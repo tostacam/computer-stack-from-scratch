@@ -88,6 +88,16 @@ static enum alu_op alu_control(uint8_t alu_op, uint8_t funct3, uint8_t funct7) {
   }
 }
 
+static uint64_t sign_extended_imm(uint64_t imm_value, unsigned bits) {
+  uint64_t sign = 1ULL << (bits - 1);
+
+  if (imm_value & sign) {
+    imm_value |= (~0ULL << bits);
+  }
+
+  return imm_value;
+}
+
 static bus64 immediate_generator(bus64 instruction) {
   // opcode
   uint64_t opcode = decode_nbits(instruction, 0, 6);
@@ -98,9 +108,11 @@ static bus64 immediate_generator(bus64 instruction) {
     case OPCODE_ITYPE:
     case OPCODE_JALR: 
       immediate = decode_nbits(instruction, 20, 31);
+      immediate = sign_extended_imm(immediate, 12);
       break;
     case OPCODE_STORE: 
-      immediate = (decode_nbits(instruction, 25, 31) << 5) | decode_nbits(instruction, 7, 11); 
+      immediate = (decode_nbits(instruction, 25, 31) << 5) | decode_nbits(instruction, 7, 11);
+      immediate = sign_extended_imm(immediate, 12);
       break;
     case OPCODE_BRANCH:
       immediate =
@@ -108,10 +120,11 @@ static bus64 immediate_generator(bus64 instruction) {
         (decode_nbits(instruction, 7, 7)   << 11) |
         (decode_nbits(instruction, 25, 30) << 5)  |
         (decode_nbits(instruction, 8, 11)  << 1);
+      immediate = sign_extended_imm(immediate, 13);
       break;
     case OPCODE_LUI:
     case OPCODE_AUIPC:
-      immediate = decode_nbits(instruction, 12, 31);
+      immediate = decode_nbits(instruction, 12, 31) << 12;
       break;
     case OPCODE_JAL:
       immediate = 
@@ -119,6 +132,7 @@ static bus64 immediate_generator(bus64 instruction) {
         (decode_nbits(instruction, 12, 19) << 12) |
         (decode_nbits(instruction, 20, 20) << 11) |
         (decode_nbits(instruction, 21, 30) << 1);
+      immediate = sign_extended_imm(immediate, 21);
       break;
     default:
       immediate = 0;
