@@ -1,0 +1,17 @@
+sim: 
+	$(MAKE) -C 01_software/sim cpu_compile
+
+rtl: 
+	$(MAKE) -C 02_hardware/rtl cpu_compile
+
+all: sim rtl
+
+test:
+	$(MAKE) -C 03_validation run_all_tests
+
+clean:
+	$(MAKE) -C 01_software/sim clean
+	$(MAKE) -C 02_hardware/rtl clean
+	$(MAKE) -C 03_validation clean
+
+ci: clean all test
