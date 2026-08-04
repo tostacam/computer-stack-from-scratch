@@ -76,9 +76,9 @@ def main():
   tests_total  = 0
   tests_passed = 0
 
-  print("\n" + "-" * 34)
+  print("\n" + "-" * 36)
   print(f"{'Program':<12} {CYAN}{'SIM':<10} {PINK}{'RTL':<10}{RESET}")
-  print("-" * 34)
+  print("-" * 36)
 
   # running all tests
   for test in PROGRAMS.glob("*.s"):
@@ -109,9 +109,9 @@ def main():
   
   percentage = 100 * tests_passed / tests_total
   color = GREEN if tests_passed == tests_total else RED
-  print("-" * 34)
+  print("-" * 36)
   print(f"{color}Summary: {tests_passed}/{tests_total} tests passed ({percentage:.1f}%){RESET}")
-  print("-" * 34 + "\n")
+  print("-" * 36 + "\n")
 
 if __name__ == "__main__":
   main()
