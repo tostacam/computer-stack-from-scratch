@@ -81,10 +81,15 @@ void output_results(Vcpu *cpu, const char *filename) {
   }
   fprintf(fp, "  },\n");
   fprintf(fp, "  \"memory\": {\n");
+  for (int i = 0; i < 16; ++i) {
+    fprintf(fp, "    \"0x000%x\": %d%s\n", i, cpu->debug_ram[i], (i == 15) ? "" : ",");
+  }
+  /*
   fprintf(fp, "    \"0x0000\": %d,\n", ram_word(cpu, 0));
   fprintf(fp, "    \"0x0004\": %d,\n", ram_word(cpu, 4));
   fprintf(fp, "    \"0x0008\": %d,\n", ram_word(cpu, 8));
   fprintf(fp, "    \"0x000C\": %d\n", ram_word(cpu, 12));
+  */
   fprintf(fp, "  }\n");
   fprintf(fp, "}\n");
   fclose(fp);

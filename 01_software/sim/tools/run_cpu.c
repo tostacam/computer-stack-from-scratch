@@ -66,10 +66,15 @@ void output_results(CPU *cpu, const char* filename) {
   }
   fprintf(fp, "  },\n");
   fprintf(fp, "  \"memory\": {\n");
+  for (int i = 0; i < 16; ++i) {
+    fprintf(fp, "    \"0x000%x\": %d%s\n", i, cpu->ram.bytes[i], (i == 15) ? "" : ",");
+  }
+  /*
   fprintf(fp, "    \"0x0000\": %d,\n", ram_data(cpu, 0));
   fprintf(fp, "    \"0x0004\": %d,\n", ram_data(cpu, 4));
   fprintf(fp, "    \"0x0008\": %d,\n", ram_data(cpu, 8));
   fprintf(fp, "    \"0x000C\": %d\n", ram_data(cpu, 12));
+  */
   fprintf(fp, "  }\n");
   fprintf(fp, "}\n");
 
