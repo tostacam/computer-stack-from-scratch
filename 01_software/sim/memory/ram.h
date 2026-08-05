@@ -9,10 +9,13 @@
 #define RAM_SIZE 1024
 
 enum MEM_SIZE {
-  MEM_BYTE_SIZE = 1,
-  MEM_HALF_SIZE = 2,
-  MEM_WORD_SIZE = 4,
-  MEM_DWRD_SIZE = 8
+  MEM_BYTE,
+  MEM_HALF,
+  MEM_WORD,
+  MEM_DWRD,
+  MEM_UBYTE,
+  MEM_UHALF,
+  MEM_UWORD
 };
 
 typedef struct {

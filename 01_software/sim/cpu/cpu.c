@@ -235,8 +235,21 @@ static void memory_access(CPU *cpu) {
   cpu->ram.write_enable = cpu->control.mem_write;
   cpu->ram.read_enable  = cpu->control.mem_read;
 
-  RAM_read(&cpu->ram, MEM_WORD_SIZE);
-  RAM_write(&cpu->ram, MEM_DWRD_SIZE);
+  uint64_t funct3 = decode_nbits(cpu->instruction, 12, 14);
+  enum MEM_SIZE RAM_MEM_SIZE;
+  switch (funct3) {
+    case 0b000: RAM_MEM_SIZE = MEM_BYTE;  break;  // lb
+    case 0b001: RAM_MEM_SIZE = MEM_HALF;  break;  // lh
+    case 0b010: RAM_MEM_SIZE = MEM_WORD;  break;  // lw
+    case 0b011: RAM_MEM_SIZE = MEM_DWRD;  break;  // ld
+    case 0b100: RAM_MEM_SIZE = MEM_UBYTE; break;  // lbu
+    case 0b101: RAM_MEM_SIZE = MEM_UHALF; break;  // lhu
+    case 0b110: RAM_MEM_SIZE = MEM_UWORD; break;  // lwu
+    default:    RAM_MEM_SIZE = MEM_WORD;  break;
+  }
+
+  RAM_read(&cpu->ram, RAM_MEM_SIZE);
+  RAM_write(&cpu->ram, RAM_MEM_SIZE);
 }
 
 static void write_back(CPU *cpu) {

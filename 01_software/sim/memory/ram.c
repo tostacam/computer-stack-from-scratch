@@ -14,20 +14,26 @@ void RAM_init(RAM *ram) {
 void RAM_read(RAM *ram, enum MEM_SIZE size) {
   if (ram->read_enable == 1) {
     switch(size) {
-      case MEM_BYTE_SIZE:
-        ram->read_data = ram->bytes[ram->address];
+      case MEM_BYTE:
+        ram->read_data = (int8_t)ram->bytes[ram->address];
         break;
-      case MEM_HALF_SIZE:
-        ram->read_data = ram->bytes[ram->address] \
-                       | (ram->bytes[ram->address + 1] << 8);
+      case MEM_HALF:
+        ram->read_data = 
+          (int16_t)(
+            ram->bytes[ram->address] \
+            | (ram->bytes[ram->address + 1] << 8)
+          );
         break;
-      case MEM_WORD_SIZE:
-        ram->read_data = ram->bytes[ram->address] \
-                       | (ram->bytes[ram->address + 1] << 8) \
-                       | (ram->bytes[ram->address + 2] << 16) \
-                       | (ram->bytes[ram->address + 3] << 24);
+      case MEM_WORD:
+        ram->read_data = 
+          (int32_t)(
+            ram->bytes[ram->address] \
+            | (ram->bytes[ram->address + 1] << 8) \
+            | (ram->bytes[ram->address + 2] << 16) \
+            | (ram->bytes[ram->address + 3] << 24)
+          );
         break;
-      case MEM_DWRD_SIZE:
+      case MEM_DWRD:
         ram->read_data = (uint64_t)ram->bytes[ram->address] \
                        | ((uint64_t)ram->bytes[ram->address + 1] << 8) \
                        | ((uint64_t)ram->bytes[ram->address + 2] << 16) \
@@ -36,6 +42,25 @@ void RAM_read(RAM *ram, enum MEM_SIZE size) {
                        | ((uint64_t)ram->bytes[ram->address + 5] << 40) \
                        | ((uint64_t)ram->bytes[ram->address + 6] << 48) \
                        | ((uint64_t)ram->bytes[ram->address + 7] << 56);
+        break;
+      case MEM_UBYTE:
+        ram->read_data = (uint8_t)ram->bytes[ram->address];
+        break;
+      case MEM_UHALF:
+        ram->read_data = 
+          (uint16_t)(
+            ram->bytes[ram->address] \
+            | (ram->bytes[ram->address + 1] << 8)
+          );
+        break;
+      case MEM_UWORD:
+        ram->read_data = 
+          (uint32_t)(
+            ram->bytes[ram->address] \
+            | (ram->bytes[ram->address + 1] << 8) \
+            | (ram->bytes[ram->address + 2] << 16) \
+            | (ram->bytes[ram->address + 3] << 24)
+          );
         break;
     }
   }
@@ -54,20 +79,20 @@ void RAM_read(RAM *ram, enum MEM_SIZE size) {
 void RAM_write(RAM *ram, enum MEM_SIZE size) {
   if (ram->write_enable == 1) {
     switch(size) {
-      case MEM_BYTE_SIZE:
+      case MEM_BYTE:
         ram->bytes[ram->address]     = (ram->write_data & BYTE0_MASK);
         break;
-      case MEM_HALF_SIZE:
+      case MEM_HALF:
         ram->bytes[ram->address]     = (ram->write_data & BYTE0_MASK);
         ram->bytes[ram->address + 1] = (ram->write_data & BYTE1_MASK) >> 8;
         break;
-      case MEM_WORD_SIZE:
+      case MEM_WORD:
         ram->bytes[ram->address]     = (ram->write_data & BYTE0_MASK);
         ram->bytes[ram->address + 1] = (ram->write_data & BYTE1_MASK) >> 8;
         ram->bytes[ram->address + 2] = (ram->write_data & BYTE2_MASK) >> 16;
         ram->bytes[ram->address + 3] = (ram->write_data & BYTE3_MASK) >> 24;
         break;
-      case MEM_DWRD_SIZE:
+      case MEM_DWRD:
         ram->bytes[ram->address]     = (ram->write_data & BYTE0_MASK);
         ram->bytes[ram->address + 1] = (ram->write_data & BYTE1_MASK) >> 8;
         ram->bytes[ram->address + 2] = (ram->write_data & BYTE2_MASK) >> 16;
@@ -76,6 +101,10 @@ void RAM_write(RAM *ram, enum MEM_SIZE size) {
         ram->bytes[ram->address + 5] = (ram->write_data & BYTE5_MASK) >> 40;
         ram->bytes[ram->address + 6] = (ram->write_data & BYTE6_MASK) >> 48;
         ram->bytes[ram->address + 7] = (ram->write_data & BYTE7_MASK) >> 56;
+        break;
+      case MEM_UBYTE:
+      case MEM_UHALF:
+      case MEM_UWORD:
         break;
     }
   }
