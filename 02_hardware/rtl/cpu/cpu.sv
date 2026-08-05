@@ -5,7 +5,9 @@ module cpu(
   output logic [63:0] debug_pc,
   output logic [31:0] debug_instruction,
   output logic [63:0] debug_rf [31:0],
-  output logic  [7:0] debug_ram [4096-1:0]
+  output logic  [7:0] debug_ram [4096-1:0],
+  output logic [63:0] debug_imm,
+  output logic [63:0] debug_jmp_addr
 );
 
 // fetch: program counter
@@ -142,10 +144,14 @@ branch_control u_branch_ctrl(
   .jump_enable(jump_enable)  
 );
 
+assign jump_address = pc + immediate;
+
 // debug signals
 assign debug_pc = pc;
 assign debug_instruction = instruction;
 assign debug_rf = u_rf.registers;
 assign debug_ram = u_ram.memory;
+assign debug_imm = u_imm_gen.immediate;
+assign debug_jmp_addr = pc_inst.jump_address;
 
 endmodule
