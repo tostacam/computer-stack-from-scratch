@@ -55,7 +55,7 @@ void CPU_run(CPU *cpu) {
   }
 
   if (cycles == MAX_CYCLES) {
-    printf("Test timed out\n"); 
+    printf("SIM test timed out\n"); 
   }
 }
 
