@@ -2,9 +2,12 @@
 #include "Vcpu.h"
 #include <iostream>
 
+#define MAX_CYCLES  100
+#define CPU_RUNNING 0
+
 void tick(Vcpu *cpu);
 void reset(Vcpu *cpu);
-void CPU_run(Vcpu *cpu, int cycles);
+void CPU_run(Vcpu *cpu);
 void output_results(Vcpu *cpu, const char *filename);
 
 int main(int argc, char *argv[]) {
@@ -19,9 +22,7 @@ int main(int argc, char *argv[]) {
   reset(&cpu);
 
   // CPU run
-  int cycles = 0;
-  sscanf(argv[2], "+CYCLES=%d", &cycles);
-  CPU_run(&cpu, cycles);
+  CPU_run(&cpu);
 
   // Output
   output_results(&cpu, argv[3]);
@@ -42,20 +43,16 @@ void reset(Vcpu *cpu) {
   cpu->reset = 0;
 }
 
-void CPU_run(Vcpu *cpu, int cycles) {
-  /*  
-  std::cout << "PC: " << cpu->debug_pc
-    << ", INST: " << std::hex << cpu->debug_instruction
-    << std::dec << "\n";
-  */
+void CPU_run(Vcpu *cpu) {
+  int cycles = 0;
 
-  while ((cpu->debug_pc/4) < cycles) {
+  while (cpu->state == CPU_RUNNING && cycles < MAX_CYCLES) {
     tick(cpu);
-    /*
-    std::cout << "PC: " << cpu->debug_pc
-      << ", INST: " << std::hex << cpu->debug_instruction
-      << std::dec << "\n";
-    */
+    ++cycles;
+  }
+
+  if (cycles == MAX_CYCLES) {
+    printf("RTL test timed out\n");
   }
 }
 

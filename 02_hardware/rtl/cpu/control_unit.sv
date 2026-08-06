@@ -97,6 +97,7 @@ always_comb begin
 
     // SYSTEM
     `OPCODE_SYSTEM: begin
+      alu_src_b = 1;
       alu_op    = 3'b111;
     end 
 

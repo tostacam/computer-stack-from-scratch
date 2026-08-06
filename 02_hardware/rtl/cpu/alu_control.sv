@@ -68,6 +68,10 @@ always_comb begin
     3'b110: 
       alu_control = `ALU_OP_ADD;
 
+    // 111 -> SYSTEM
+    3'b111:
+      alu_control = `ALU_OP_PASS_B;
+
     default:
       alu_control = `ALU_OP_ADD;
 

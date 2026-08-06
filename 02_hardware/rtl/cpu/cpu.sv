@@ -1,6 +1,8 @@
 module cpu(
-  input logic clk,
-  input logic reset,
+  input  logic clk,
+  input  logic reset,
+  output logic state,
+  output logic [1:0] trap,
 
   output logic [63:0] debug_pc,
   output logic [31:0] debug_instruction,
@@ -11,6 +13,7 @@ module cpu(
 );
 
 // fetch: program counter
+logic        pc_clk;
 logic        clear;
 logic        jump_enable;
 logic [63:0] jump_address;
@@ -55,17 +58,17 @@ logic [63:0] immediate;
 logic [3:0] alu_control;
 
 // fetch
-program_counter pc_inst(
-  .clk(clk),
+program_counter u_pc(
+  .clk(pc_clk),
   .clear(reset),
   .jump_enable(jump_enable),
   .jump_address(jump_address),
   .pc(pc)
 );
 
-rom rom_inst(
+rom u_rom(
   .address(pc),
-  .instruction(instruction)  );
+  .instruction(instruction));
 
 // decode
 instruction_decoder u_inst_dec(
@@ -125,6 +128,23 @@ alu u_alu(
   .f_zero(alu_zero)
 );
 
+// check cpu state
+always_comb begin
+  state = 0;
+
+  if (opcode == `OPCODE_SYSTEM) begin
+    state = 1;
+    case (immediate)
+      0: // ECALL
+        trap = 0;
+      1: // EBREAK
+        trap = 0;
+    endcase
+  end
+
+  pc_clk = !state && clk;
+end
+
 // memory access
 ram u_ram(
   .clk(clk),
@@ -171,6 +191,6 @@ assign debug_instruction = instruction;
 assign debug_rf = u_rf.registers;
 assign debug_ram = u_ram.memory;
 assign debug_imm = u_imm_gen.immediate;
-assign debug_jmp_addr = pc_inst.jump_address;
+assign debug_jmp_addr = u_pc.jump_address;
 
 endmodule
