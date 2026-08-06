@@ -18,6 +18,8 @@ void CPU_init(CPU *cpu, ROM *rom) {
   cpu->control.mem_write  = 0;
   cpu->control.pc_src     = 0;
   cpu->control.alu_op     = 0;
+  cpu->state              = CPU_RUNNING;
+  cpu->trap               = TRAP_NONE;
 }
 
 static void fetch(CPU *cpu) {
@@ -83,6 +85,10 @@ static enum alu_op alu_control(uint8_t alu_op, uint8_t funct3, uint8_t funct7) {
     // 110 -> JAL/JALR
     case 0b110:
       return ALU_OP_ADD;
+
+    // 111 -> SYSTEM
+    case 0b111:
+      return ALU_OP_PASS_B;
 
     // default
     default:
@@ -222,6 +228,7 @@ static void decode(CPU *cpu) {
       cpu->control.alu_op     = 0b110;
       break;
     case OPCODE_SYSTEM:
+      cpu->control.alu_src_b  = 1;
       cpu->control.alu_op     = 0b111;
       break;
   }
@@ -237,6 +244,18 @@ static void decode(CPU *cpu) {
 
 static void execute(CPU *cpu) {
   alu_eval(&cpu->alu);
+
+  uint64_t opcode = decode_nbits(cpu->instruction, 0, 6);
+  if (opcode == OPCODE_SYSTEM) {
+    switch (decode_amount(cpu->immediate)) {
+      case 0:
+        cpu->trap = TRAP_ECALL;
+        return;
+      case 1:
+        cpu->trap = TRAP_EBREAK;
+        return;
+    }
+  }
 }
 
 static void memory_access(CPU *cpu) {
@@ -325,9 +344,18 @@ static void update_pc(CPU *cpu) {
 }
 
 void CPU_cycle(CPU *cpu) {
+  if (cpu->state == CPU_HALTED)
+    return;
+
   fetch(cpu);
   decode(cpu);
   execute(cpu);
+
+  if (cpu->trap != TRAP_NONE) {
+    cpu->state = CPU_HALTED;
+    return;
+  }
+
   memory_access(cpu);
   write_back(cpu);
   update_pc(cpu);

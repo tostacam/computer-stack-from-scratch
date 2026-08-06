@@ -45,6 +45,18 @@ enum pc_src {
   PC_JALR
 };
 
+typedef enum {
+  CPU_RUNNING,
+  CPU_HALTED
+} cpu_state_t;
+
+typedef enum {
+  TRAP_NONE,
+  TRAP_ECALL,
+  TRAP_EBREAK,
+  TRAP_ILLEGAL_INSTRUCTION
+} trap_reason_t;
+
 typedef struct {
   bit         alu_src_a;
   bit         alu_src_b;
@@ -67,6 +79,8 @@ typedef struct {
   bus64           immediate;
   bus64           jump_address;
   control_signals control;
+  cpu_state_t     state;
+  trap_reason_t   trap;
 } CPU;
 
 void CPU_init(CPU *cpu, ROM *rom);

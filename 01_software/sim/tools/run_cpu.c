@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "cpu.h"
+#define  MAX_CYCLES 100
 
 void load_program(ROM *rom, const char *filename);
 void CPU_run(CPU *cpu);
@@ -46,8 +47,15 @@ void load_program(ROM *rom, const char *filename) {
 }
 
 void CPU_run(CPU *cpu) {
-  while (decode_amount(register64_output(&cpu->pc.output_reg)) < cpu->rom.size * 4) {
+  int cycles = 0;
+
+  while (cpu->state == CPU_RUNNING && cycles < MAX_CYCLES) {
     CPU_cycle(cpu);
+    ++cycles;
+  }
+
+  if (cycles == MAX_CYCLES) {
+    printf("Test timed out\n"); 
   }
 }
 
