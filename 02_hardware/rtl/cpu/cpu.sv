@@ -29,6 +29,7 @@ logic [63:0]  rs1_data;
 logic [63:0]  rs2_data;
 
 // execute: alu
+logic [63:0] alu_a_input;
 logic [63:0] alu_b_input;
 logic        alu_zero;
 logic [63:0] alu_result;
@@ -40,7 +41,8 @@ logic [63:0] ram_data;
 logic [63:0] rf_wr_data;
 
 // control: control unit
-logic       alu_src;
+logic       alu_src_a;
+logic       alu_src_b;
 logic       mem_to_reg;
 logic       reg_write;
 logic       mem_read;
@@ -95,7 +97,8 @@ immediate_generator u_imm_gen(
 
 control_unit u_ctrl_unit(
   .opcode(opcode),
-  .alu_src(alu_src),
+  .alu_src_a(alu_src_a),
+  .alu_src_b(alu_src_b),
   .mem_to_reg(mem_to_reg),
   .reg_write(reg_write),
   .mem_read(mem_read),
@@ -112,10 +115,11 @@ alu_control u_alu_ctrl(
   .alu_control(alu_control)
 );
 
-assign alu_b_input = alu_src ? immediate : rs2_data;
+assign alu_a_input = alu_src_a ? pc : rs1_data;
+assign alu_b_input = alu_src_b ? immediate : rs2_data;
 
 alu u_alu(
-  .a(rs1_data),
+  .a(alu_a_input),
   .b(alu_b_input),
   .alu_control(alu_control),
   .out(alu_result),
@@ -132,8 +136,8 @@ ram u_ram(
   .rd_data(ram_data)
 );
 
-// write back 
-assign rf_wr_data = mem_to_reg ? ram_data : alu_result; 
+// write back
+assign rf_wr_data = mem_to_reg ? ram_data : alu_result;
 
 // update pc
 branch_control u_branch_ctrl(
