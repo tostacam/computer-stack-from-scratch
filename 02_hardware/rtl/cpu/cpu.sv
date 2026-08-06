@@ -43,11 +43,11 @@ logic [63:0] rf_wr_data;
 // control: control unit
 logic       alu_src_a;
 logic       alu_src_b;
-logic       mem_to_reg;
+logic [1:0] wb_src;
 logic       reg_write;
 logic       mem_read;
 logic       mem_write;
-logic       branch;
+logic [1:0] pc_src;
 logic [2:0] alu_op;
 // control: immediate control unit
 logic [63:0] immediate;
@@ -65,8 +65,7 @@ program_counter pc_inst(
 
 rom rom_inst(
   .address(pc),
-  .instruction(instruction)  
-);
+  .instruction(instruction)  );
 
 // decode
 instruction_decoder u_inst_dec(
@@ -99,11 +98,11 @@ control_unit u_ctrl_unit(
   .opcode(opcode),
   .alu_src_a(alu_src_a),
   .alu_src_b(alu_src_b),
-  .mem_to_reg(mem_to_reg),
+  .wb_src(wb_src),
   .reg_write(reg_write),
   .mem_read(mem_read),
   .mem_write(mem_write),
-  .branch(branch),
+  .pc_src(pc_src),
   .alu_op(alu_op)
 );
 
@@ -137,18 +136,34 @@ ram u_ram(
 );
 
 // write back
-assign rf_wr_data = mem_to_reg ? ram_data : alu_result;
+always_comb begin
+  case (wb_src) 
+    `WB_ALU: begin
+      rf_wr_data = alu_result;
+    end 
+    `WB_MEM: begin
+      rf_wr_data = ram_data;
+    end
+    `WB_PC4: begin
+      rf_wr_data = pc + 4;
+    end
+    default: begin
+    end
+  endcase 
+end
 
 // update pc
 branch_control u_branch_ctrl(
-  .branch(branch),
+  .pc_src(pc_src),
   .funct3(funct3),
   .alu_zero(alu_zero),
   .alu_result(alu_result),
-  .jump_enable(jump_enable)  
+  .pc(pc),
+  .immediate(immediate),
+  .rs1_data(rs1_data),
+  .jump_enable(jump_enable),
+  .jump_address(jump_address)
 );
-
-assign jump_address = pc + immediate;
 
 // debug signals
 assign debug_pc = pc;
