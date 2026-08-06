@@ -9,6 +9,10 @@ all: sim rtl
 test:
 	$(MAKE) -C 03_validation run_all_tests
 
+solo_test:
+	$(MAKE) -C 03_validation clean
+	$(MAKE) -C 03_validation run_solo_test
+
 clean:
 	$(MAKE) -C 01_software/sim clean
 	$(MAKE) -C 02_hardware/rtl clean
