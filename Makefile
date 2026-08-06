@@ -9,7 +9,7 @@ all: sim rtl
 test:
 	$(MAKE) -C 03_validation run_all_tests
 
-solo_test:
+solo_test: sim rtl
 	$(MAKE) -C 03_validation clean
 	$(MAKE) -C 03_validation run_solo_test
 
