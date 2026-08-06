@@ -8,13 +8,15 @@ void CPU_init(CPU *cpu, ROM *rom) {
   RAM_init(&cpu->ram);
 
   cpu->instruction        = bus64_zero();
+  cpu->immediate          = bus64_zero();  
   cpu->jump_address       = bus64_zero();
-  cpu->control.alu_src    = 0;
-  cpu->control.mem_to_reg = 0;
+  cpu->control.alu_src_a  = 0;
+  cpu->control.alu_src_b  = 0;
+  cpu->control.wb_src     = 0;
   cpu->control.reg_write  = 0;
   cpu->control.mem_read   = 0;
   cpu->control.mem_write  = 0;
-  cpu->control.branch     = 0;
+  cpu->control.pc_src     = 0;
   cpu->control.alu_op     = 0;
 }
 
@@ -158,12 +160,13 @@ static void decode(CPU *cpu) {
   cpu->rf.write_addr  = encode_amount(rd);
 
   // default control_signals
-  cpu->control.alu_src    = 0;
-  cpu->control.mem_to_reg = 0;
+  cpu->control.alu_src_a  = 0;
+  cpu->control.alu_src_b  = 0;
+  cpu->control.wb_src     = WB_ALU;
   cpu->control.reg_write  = 0;
   cpu->control.mem_read   = 0;
   cpu->control.mem_write  = 0;
-  cpu->control.branch     = 0;
+  cpu->control.pc_src     = PC_NEXT;
   cpu->control.alu_op     = 0;
 
   switch (opcode) {
@@ -172,43 +175,50 @@ static void decode(CPU *cpu) {
       cpu->control.alu_op     = 0b001;
       break;
     case OPCODE_ITYPE:
-      cpu->control.alu_src    = 1;
+      cpu->control.alu_src_b  = 1;
       cpu->control.reg_write  = 1;
       cpu->control.alu_op     = 0b011;
       break;
     case OPCODE_LOAD:
-      cpu->control.alu_src    = 1;
-      cpu->control.mem_to_reg = 1;
+      cpu->control.wb_src     = WB_MEM;
+      cpu->control.alu_src_b  = 1;
       cpu->control.reg_write  = 1;
       cpu->control.mem_read   = 1;
       cpu->control.alu_op     = 0b000;
       break;
     case OPCODE_STORE:
+      cpu->control.wb_src     = WB_MEM;
       cpu->control.mem_write  = 1;
-      cpu->control.alu_src    = 1;
+      cpu->control.alu_src_b  = 1;
       cpu->control.alu_op     = 0b000;
       break;
     case OPCODE_BRANCH:
-      cpu->control.branch     = 1;
+      cpu->control.pc_src     = PC_BRANCH;
       cpu->control.alu_op     = 0b010;
       break;
     case OPCODE_LUI:
-      cpu->control.alu_src    = 1;
+      cpu->control.alu_src_a  = 1;
+      cpu->control.alu_src_b  = 1;
       cpu->control.reg_write  = 1;
       cpu->control.alu_op     = 0b100;
       break;
     case OPCODE_AUIPC:
-      cpu->control.alu_src    = 1;
+      cpu->control.alu_src_a  = 1;
+      cpu->control.alu_src_b  = 1;
       cpu->control.reg_write  = 1;
       cpu->control.alu_op     = 0b101;
       break;
     case OPCODE_JAL:
+      cpu->control.wb_src     = WB_PC4;
       cpu->control.reg_write  = 1;
+      cpu->control.pc_src     = PC_JAL;
       cpu->control.alu_op     = 0b110;
       break;
     case OPCODE_JALR:
-      cpu->control.alu_src    = 1;
+      cpu->control.wb_src     = WB_PC4;
+      cpu->control.alu_src_b  = 1;
       cpu->control.reg_write  = 1;
+      cpu->control.pc_src     = PC_JALR;
       cpu->control.alu_op     = 0b110;
       break;
     case OPCODE_SYSTEM:
@@ -216,11 +226,13 @@ static void decode(CPU *cpu) {
       break;
   }
 
-  cpu->alu.opcode = alu_control(cpu->control.alu_op, funct3, funct7);
-  cpu->alu.a      = cpu->rf.read_data_a;
-  cpu->alu.b      = cpu->control.alu_src ? immediate_generator(cpu->instruction) : cpu->rf.read_data_b; 
+  cpu->immediate  = immediate_generator(cpu->instruction);
 
-  cpu->jump_address = add64_no_crry(register64_output(&cpu->pc.output_reg), immediate_generator(cpu->instruction));
+  cpu->alu.opcode = alu_control(cpu->control.alu_op, funct3, funct7);
+  cpu->alu.a      = cpu->control.alu_src_a ? register64_output(&cpu->pc.output_reg) : cpu->rf.read_data_a;
+  cpu->alu.b      = cpu->control.alu_src_b ? cpu->immediate : cpu->rf.read_data_b; 
+
+  cpu->jump_address = add64_no_crry(register64_output(&cpu->pc.output_reg), cpu->immediate);
 }
 
 static void execute(CPU *cpu) {
@@ -254,38 +266,61 @@ static void memory_access(CPU *cpu) {
 
 static void write_back(CPU *cpu) {
   cpu->rf.write_enable = cpu->control.reg_write;
-  cpu->rf.write_data = cpu->control.mem_to_reg ? encode_amount(cpu->ram.read_data) : cpu->alu.output;
+  switch (cpu->control.wb_src) {
+    case WB_ALU:
+      cpu->rf.write_data = cpu->alu.output;
+      break;
+    case WB_MEM:
+      cpu->rf.write_data = encode_amount(cpu->ram.read_data);
+      break;
+    case WB_PC4:
+      cpu->rf.write_data = add64_no_crry(register64_output(&cpu->pc.output_reg), encode_amount(4));
+      break;
+  }
   register_file_tick(&cpu->rf);
 }
 
 static void update_pc(CPU *cpu) {
   cpu->pc.jump_addr = cpu->jump_address;
+  uint8_t funct3 = decode_nbits(cpu->instruction, 12, 14);
+
+  switch (cpu->control.pc_src) {
+    case PC_NEXT:
+      cpu->pc.jump = 0;
+      break;
+    case PC_BRANCH:
+      switch (funct3) {
+        case FUNCT3_BEQ:
+          cpu->pc.jump = cpu->alu.f_zero;
+          break;
+        case FUNCT3_BNE:
+          cpu->pc.jump = !cpu->alu.f_zero;
+          break;
+        case FUNCT3_BLT:
+          cpu->pc.jump = (decode_amount(cpu->alu.output) == 1);
+          break;
+        case FUNCT3_BGE:
+          cpu->pc.jump = (decode_amount(cpu->alu.output) == 0);
+          break;
+        case FUNCT3_BLTU:
+          cpu->pc.jump = (decode_amount(cpu->alu.output) == 1);
+          break;
+        case FUNCT3_BGEU:
+          cpu->pc.jump = (decode_amount(cpu->alu.output) == 0);
+          break;
+      }
+      break;
+    case PC_JAL:
+      cpu->pc.jump = 1;
+      cpu->pc.jump_addr = add64_no_crry(register64_output(&cpu->pc.output_reg), cpu->immediate);
+      break;
+    case PC_JALR:
+      cpu->pc.jump = 1;
+      cpu->pc.jump_addr =
+        bitwise_and(add64_no_crry(cpu->rf.read_data_a, cpu->immediate), encode_amount(~1ULL));
+      break;
+  } 
   
-  if (cpu->control.branch) {
-    uint8_t funct3 = decode_nbits(cpu->instruction, 12, 14);
-
-    switch (funct3) {
-      case FUNCT3_BEQ:
-        cpu->pc.jump = cpu->alu.f_zero;
-        break;
-      case FUNCT3_BNE:
-        cpu->pc.jump = !cpu->alu.f_zero;
-        break;
-      case FUNCT3_BLT:
-        cpu->pc.jump = (decode_amount(cpu->alu.output) == 1);
-        break;
-      case FUNCT3_BGE:
-        cpu->pc.jump = (decode_amount(cpu->alu.output) == 0);
-        break;
-      case FUNCT3_BLTU:
-        cpu->pc.jump = (decode_amount(cpu->alu.output) == 1);
-        break;
-      case FUNCT3_BGEU:
-        cpu->pc.jump = (decode_amount(cpu->alu.output) == 0);
-        break;
-    }
-  }
-
   program_counter_tick(&cpu->pc);
 }
 

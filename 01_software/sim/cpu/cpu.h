@@ -32,14 +32,28 @@ enum branch_codes {
   FUNCT3_BGEU = 0b111
 };
 
+enum wb_src {
+  WB_ALU,
+  WB_MEM,
+  WB_PC4
+};
+
+enum pc_src {
+  PC_NEXT,
+  PC_BRANCH,
+  PC_JAL,
+  PC_JALR
+};
+
 typedef struct {
-  bit     alu_src;
-  bit     mem_to_reg;
-  bit     reg_write;
-  bit     mem_read;
-  bit     mem_write;
-  bit     branch;
-  uint8_t alu_op;
+  bit         alu_src_a;
+  bit         alu_src_b;
+  enum wb_src wb_src;
+  bit         reg_write;
+  bit         mem_read;
+  bit         mem_write;
+  enum pc_src pc_src;
+  uint8_t     alu_op;
 } control_signals;
 
 typedef struct {
@@ -50,6 +64,7 @@ typedef struct {
   RAM             ram;
 
   bus64           instruction; 
+  bus64           immediate;
   bus64           jump_address;
   control_signals control;
 } CPU;
