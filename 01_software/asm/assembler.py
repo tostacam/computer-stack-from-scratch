@@ -78,8 +78,16 @@ def parse(tokens, symbol_table):
           "type"    : "I",
           "mnemonic": mnemonic,
           "rd"      : register_number(token[1]),
-          "imm"     : int(token[2], 0),
-          "rs1"     : register_number(token[3])
+          "rs1"     : register_number(token[3]),
+          "imm"     : int(token[2], 0)
+        }
+      elif isa_data["I-type"] == "system":
+        instruction = {
+          "type"    : "I",
+          "mnemonic": mnemonic,
+          "rd"      : 0,
+          "rs1"     : 0,
+          "imm"     : isa_data["imm"]
         }
     elif instruction_type == "S":
       instruction = {

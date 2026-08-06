@@ -155,6 +155,20 @@ instruction_table = {
     "opcode": 0b1100111,
     "funct3": 0b000,
   },
+  "ecall": {
+    "type"  : "I",
+    "I-type": "system",
+    "opcode": 0b1110011,
+    "funct3": 0b000,
+    "imm"   : 0,
+  },
+  "ebreak": {
+    "type"  : "I",
+    "I-type": "system",
+    "opcode": 0b1110011,
+    "funct3": 0b000,
+    "imm"   : 1,
+  },
 
   # ---------------- S ----------------
   "sb": {

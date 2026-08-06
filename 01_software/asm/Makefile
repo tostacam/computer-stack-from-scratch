@@ -1,4 +1,4 @@
-TEST_FILE = tests/labels.s
+TEST_FILE = tests/system_calls.s
 
 test_assembler:
 	python3 validate_assembler.py $(TEST_FILE)
