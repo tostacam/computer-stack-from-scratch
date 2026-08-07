@@ -4,3 +4,4 @@
   addi x3, x0, 111
 notequal:
   addi x3, x0, 222
+  ebreak

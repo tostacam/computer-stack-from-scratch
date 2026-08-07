@@ -4,3 +4,4 @@
   addi x3, x0, 111
 greater_than:
   addi x3, x0, 222
+  ebreak

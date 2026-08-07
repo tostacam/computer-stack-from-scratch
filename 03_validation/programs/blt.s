@@ -4,3 +4,4 @@
   addi x3, x0, 111
 less_than:
   addi x3, x0, 222
+  ebreak
