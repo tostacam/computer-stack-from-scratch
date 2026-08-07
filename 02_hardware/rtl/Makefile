@@ -38,7 +38,7 @@ cpu_compile:
     -Icpu \
     --cc $(CPU_SRC) $(MEM_SRC) \
     --top-module cpu \
-    --exe tools/run_rtl.cpp \
+    --exe tools/run_rtl_cpu.cpp \
     --build
 
 clean: 

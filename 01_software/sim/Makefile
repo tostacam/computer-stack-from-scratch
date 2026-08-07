@@ -63,7 +63,7 @@ cpu_tester:
 		./tests/cpu_program_tester tests/programs/bne.txt tests/programs/bne.exp
 
 cpu_compile:
-	$(CC) $(CFLAGS) tools/run_cpu.c $(LOGIC_SRCS) $(CIRCUITS_SRCS) $(CPU_SRCS) $(TEST_UTIL) $(MEM_SRCS) -o tools/run_cpu
+	$(CC) $(CFLAGS) tools/run_sim_cpu.c $(LOGIC_SRCS) $(CIRCUITS_SRCS) $(CPU_SRCS) $(TEST_UTIL) $(MEM_SRCS) -o tools/run_sim_cpu
 
 clean:
 	rm -f tests/test_nand tests/test_gates tests/test_bus tests/test_adders tests/test_mux \

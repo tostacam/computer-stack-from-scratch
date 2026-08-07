@@ -4,7 +4,7 @@ import json
 
 ROOT = Path(__file__).resolve().parent.parent
 ASSEMBLER = ROOT / "01_software" / "asm" / "assembler.py"
-SIM       = ROOT / "01_software" / "sim" / "tools" / "run_cpu"
+SIM       = ROOT / "01_software" / "sim" / "tools" / "run_sim_cpu"
 RTL       = ROOT / "02_hardware" / "rtl" / "obj_dir" / "Vcpu"
 
 PRG_FILES = ROOT / "03_validation" / "solo_test"
