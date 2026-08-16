@@ -2,7 +2,7 @@ module ram #(
   parameter MEM_SIZE = 4096  
 )(
   input  logic        clk,
-  input  logic [2:0]  funct3,
+  input  logic [2:0]  word_size,
   input  logic        wr_enable,
   input  logic [63:0] address, 
   input  logic [63:0] wr_data,
@@ -19,7 +19,7 @@ assign mem_addr = address[ADDR_WIDTH-1:0];
 
 // combinational read
 always_comb begin
-  case (funct3)
+  case (word_size)
     3'b000: begin // LB
       rd_data = {{56{memory[mem_addr][7]}}, memory[mem_addr]};
     end
@@ -79,7 +79,7 @@ end
 // sequential write
 always_ff @(posedge clk) begin
   if (wr_enable) begin
-    case (funct3) 
+    case (word_size) 
       3'b000: begin // SB
         memory[mem_addr] <= wr_data[7:0];
       end

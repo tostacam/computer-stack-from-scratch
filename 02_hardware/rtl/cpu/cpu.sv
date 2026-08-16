@@ -148,7 +148,7 @@ end
 // memory access
 ram u_ram(
   .clk(clk),
-  .funct3(funct3),
+  .word_size(funct3),
   .wr_enable(mem_write),
   .address(alu_result),
   .wr_data(rs2_data),
