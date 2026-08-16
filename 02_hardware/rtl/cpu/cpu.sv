@@ -3,13 +3,15 @@ module cpu(
   input  logic reset,
   output logic state,
   output logic [1:0] trap,
-
-  output logic [63:0] debug_pc,
-  output logic [31:0] debug_instruction,
-  output logic [63:0] debug_rf [31:0],
-  output logic  [7:0] debug_ram [4096-1:0],
-  output logic [63:0] debug_imm,
-  output logic [63:0] debug_jmp_addr
+  // instruction bus
+  output logic [63:0] instruction_address,
+  input  logic [31:0] instruction_data,
+  // data bus
+  output logic [63:0] data_address,
+  output logic [63:0] data_write,
+  input  logic [63:0] data_read,
+  output logic        dt_mem_read,
+  output logic        dt_mem_write
 );
 
 // fetch: program counter
@@ -39,6 +41,7 @@ logic [63:0] alu_result;
 
 // memory access: ram
 logic [63:0] ram_data;
+logic  [2:0] word_size;
 
 // write back: mux
 logic [63:0] rf_wr_data;
@@ -66,9 +69,8 @@ program_counter u_pc(
   .pc(pc)
 );
 
-rom u_rom(
-  .address(pc),
-  .instruction(instruction));
+assign instruction_address = pc;
+assign instruction = instruction_data;
 
 // decode
 instruction_decoder u_inst_dec(
@@ -146,14 +148,12 @@ always_comb begin
 end
 
 // memory access
-ram u_ram(
-  .clk(clk),
-  .word_size(funct3),
-  .wr_enable(mem_write),
-  .address(alu_result),
-  .wr_data(rs2_data),
-  .rd_data(ram_data)
-);
+assign data_address = alu_result;
+assign data_write   = rs2_data;
+assign ram_data     = data_read;
+assign dt_mem_write = mem_write;
+assign dt_mem_read  = mem_read;
+assign word_size    = funct3;
 
 // write back
 always_comb begin
@@ -184,13 +184,5 @@ branch_control u_branch_ctrl(
   .jump_enable(jump_enable),
   .jump_address(jump_address)
 );
-
-// debug signals
-assign debug_pc = pc;
-assign debug_instruction = instruction;
-assign debug_rf = u_rf.registers;
-assign debug_ram = u_ram.memory;
-assign debug_imm = u_imm_gen.immediate;
-assign debug_jmp_addr = u_pc.jump_address;
 
 endmodule

@@ -1,14 +1,14 @@
 #include <verilated.h>
-#include "Vcpu.h"
+#include "Vcpu_system.h"
 #include <iostream>
 
 #define MAX_CYCLES  100
 #define CPU_RUNNING 0
 
-void tick(Vcpu *cpu);
-void reset(Vcpu *cpu);
-void CPU_run(Vcpu *cpu);
-void output_results(Vcpu *cpu, const char *filename);
+void tick(Vcpu_system *cpu);
+void reset(Vcpu_system *cpu); 
+void CPU_run(Vcpu_system *cpu);
+void output_results(Vcpu_system *cpu, const char *filename);
 
 int main(int argc, char *argv[]) {
   if (argc != 4) {
@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
 
   // CPU init
   Verilated::commandArgs(argc, argv);
-  Vcpu cpu;
+  Vcpu_system cpu;
   reset(&cpu);
 
   // CPU run
@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
   output_results(&cpu, argv[3]);
 }
 
-void tick(Vcpu *cpu) {
+void tick(Vcpu_system *cpu) {
   cpu->clk = 0;
   cpu->eval();
 
@@ -36,14 +36,14 @@ void tick(Vcpu *cpu) {
   cpu->eval();
 }
 
-void reset(Vcpu *cpu) {
+void reset(Vcpu_system *cpu) {
   cpu->reset = 1;
   tick(cpu);
   tick(cpu);
   cpu->reset = 0;
 }
 
-void CPU_run(Vcpu *cpu) {
+void CPU_run(Vcpu_system *cpu) {
   int cycles = 0;
 
   while (cpu->state == CPU_RUNNING && cycles < MAX_CYCLES) {
@@ -56,7 +56,7 @@ void CPU_run(Vcpu *cpu) {
   }
 }
 
-int ram_word(Vcpu *cpu, int i) {
+int ram_word(Vcpu_system *cpu, int i) {
   int word = 0;
 
   word |= cpu->debug_ram[i];
@@ -67,7 +67,7 @@ int ram_word(Vcpu *cpu, int i) {
   return word;
 }
 
-void output_results(Vcpu *cpu, const char *filename) {
+void output_results(Vcpu_system *cpu, const char *filename) {
   FILE *fp = fopen(filename, "w");
 
   fprintf(fp, "{\n");

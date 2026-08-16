@@ -4,6 +4,7 @@ module ram #(
   input  logic        clk,
   input  logic [2:0]  word_size,
   input  logic        wr_enable,
+  input  logic        rd_enable,
   input  logic [63:0] address, 
   input  logic [63:0] wr_data,
   output logic [63:0] rd_data
@@ -19,61 +20,65 @@ assign mem_addr = address[ADDR_WIDTH-1:0];
 
 // combinational read
 always_comb begin
-  case (word_size)
-    3'b000: begin // LB
-      rd_data = {{56{memory[mem_addr][7]}}, memory[mem_addr]};
-    end
-    3'b001: begin // LH
-      rd_data = {
-        {48{memory[mem_addr + 1][7]}},
-        memory[mem_addr + 1],
-        memory[mem_addr]
-      };
-    end
-    3'b010: begin // LW
-      rd_data = {
-        {32{memory[mem_addr + 3][7]}},
-        memory[mem_addr + 3],
-        memory[mem_addr + 2],
-        memory[mem_addr + 1],
-        memory[mem_addr]
-      };
-    end 
-    3'b011: begin // LD
-      rd_data = {
-        memory[mem_addr + 7],
-        memory[mem_addr + 6],
-        memory[mem_addr + 5],
-        memory[mem_addr + 4],
-        memory[mem_addr + 3],
-        memory[mem_addr + 2],
-        memory[mem_addr + 1],
-        memory[mem_addr]
-      };  
-    end
-    3'b100: begin // LBU
-      rd_data = {56'b0, memory[mem_addr]};
-    end
-    3'b101: begin // LHU
-      rd_data = {
-        48'b0,
-        memory[mem_addr + 1],
-        memory[mem_addr]  
-      };
-    end 
-    3'b110: begin
-      rd_data = {
-        32'b0,
-        memory[mem_addr + 3],
-        memory[mem_addr + 2],
-        memory[mem_addr + 1],
-        memory[mem_addr]
-      };
-    end
-    default: begin
-      rd_data = '0;
-    end
-  endcase 
+  if (rd_enable) begin
+    case (word_size)
+      3'b000: begin // LB
+        rd_data = {{56{memory[mem_addr][7]}}, memory[mem_addr]};
+      end
+      3'b001: begin // LH
+        rd_data = {
+          {48{memory[mem_addr + 1][7]}},
+          memory[mem_addr + 1],
+          memory[mem_addr]
+        };
+      end
+      3'b010: begin // LW
+        rd_data = {
+          {32{memory[mem_addr + 3][7]}},
+          memory[mem_addr + 3],
+          memory[mem_addr + 2],
+          memory[mem_addr + 1],
+          memory[mem_addr]
+        };
+      end 
+      3'b011: begin // LD
+        rd_data = {
+          memory[mem_addr + 7],
+          memory[mem_addr + 6],
+          memory[mem_addr + 5],
+          memory[mem_addr + 4],
+          memory[mem_addr + 3],
+          memory[mem_addr + 2],
+          memory[mem_addr + 1],
+          memory[mem_addr]
+        };  
+      end
+      3'b100: begin // LBU
+        rd_data = {56'b0, memory[mem_addr]};
+      end
+      3'b101: begin // LHU
+        rd_data = {
+          48'b0,
+          memory[mem_addr + 1],
+          memory[mem_addr]  
+        };
+      end 
+      3'b110: begin
+        rd_data = {
+          32'b0,
+          memory[mem_addr + 3],
+          memory[mem_addr + 2],
+          memory[mem_addr + 1],
+          memory[mem_addr]
+        };
+      end
+      default: begin
+        rd_data = '0;
+      end
+    endcase 
+  end
+  else 
+    rd_data = 0;
 end
 
 // sequential write
