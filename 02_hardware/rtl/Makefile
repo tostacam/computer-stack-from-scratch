@@ -1,6 +1,7 @@
 PRIM_SRC = primitives/*.sv
 MEM_SRC = memory/*.sv
 CPU_SRC = cpu/*.sv
+PER_SRC = peripherals/*.sv
 VFLAGS = --lint-only -Icpu -Wno-MULTITOP
 
 test_dff:
@@ -32,6 +33,11 @@ test_cpu:
 	xvlog --sv $(CPU_SRC) $(MEM_SRC) tests/cpu_tb.sv
 	xelab cpu_tb -debug typical
 	xsim cpu_tb -runall 
+
+test_uart:
+	xvlog --sv $(PER_SRC) tests/uart_tb.sv
+	xelab uart_tb -debug typical
+	xsim cpu_tb -runall
 
 cpu_compile:
 	verilator \
