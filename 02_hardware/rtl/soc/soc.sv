@@ -1,100 +1,89 @@
-`include "address_space.svh"
-
 module soc(
-  input  logic       clk,
-  input  logic       reset,
-  input  logic       uart_rx,
-  output logic       uart_rx,
-  input  logic [3:0] sw,
-  output logic [3:0] led
+  input  logic clk,
+  input  logic reset,
+  output logic state,
+  output logic [1:0] trap,
+  input  logic uart_rx,
+  output logic uart_tx
 );
 
-// CPU <-> Instruction ROM
-logic [31:0] instruction_address;
+// CPU <-> Instruction Bus
+logic [63:0] instruction_address;
 logic [31:0] instruction_data;
 
 // CPU <-> Data Bus
-logic [31:0] data_address;
-logic [31:0] data_write;
-logic [31:0] data_read;
+logic [63:0] data_address;
+logic [63:0] data_write;
+logic [63:0] data_read;
 logic        mem_read;
 logic        mem_write;
 
 // Device selects
-logic rom_select;
 logic ram_select;
 logic gpio_select;
 logic uart_select;
 
 // Device read data
-logic [31:0] ram_read_data;
-logic [31:0] gpio_read_data;
-logic [31:0] uart_read_data;
+logic [63:0] ram_read_data;
+logic [63:0] gpio_read_data;
+logic [63:0] uart_read_data;
 
 // CPU
 cpu u_cpu(
   .clk(clk),
   .reset(reset),
+  .state(state),
+  .trap(trap),
+  // instruction bus
   .instruction_address(instruction_address),
   .instruction_data(instruction_data),
+  // data bus
   .data_address(data_address),
   .data_write(data_write),
   .data_read(data_read),
-  .mem_read(mem_read),
-  .mem_write(mem_write)
+  .dt_mem_read(mem_read),
+  .dt_mem_write(mem_write)
 );
 
-// Instruction ROM
+// ROM
 rom u_rom(
   .address(instruction_address),
-  .data(instruction_data)  
+  .instruction(instruction_data)  
 );
 
-// Data RAM
+// RAM
 ram u_ram(
   .clk(clk),
+  .word_size(u_cpu.word_size),
+  .wr_enable(mem_write && ram_select),
+  .rd_enable(mem_read && ram_select),
   .address(data_address),
-  .write_data(data_write),
-  .read_data(ram_read_data),
-  .write_enable(mem_write && ram_select)
-);
-
-// GPIO
-gpio u_gpio(
-  .clk(clk),
-  .address(data_address),
-  .write_data(data_write),
-  .read_data(gpio_read_data),
-  .write_enable(mem_write && gpio_select),
-  .switches(sw),
-  .leds(led)
+  .wr_data(data_write),
+  .rd_data(ram_read_data)
 );
 
 // UART
 uart u_uart(
   .clk(clk),
+  .reset(reset),
+  .wr_enable(mem_write && uart_select),
   .address(data_address),
-  .write_data(data_write),
-  .read_data(uart_read_data),
-  .write_enable(mem_write && uart_select),
-  .rx(uart_rx),
+  .wr_data(data_write),
+  .rd_data(uart_read_data),
   .tx(uart_tx)
 );
 
 // address decoder
 always_comb begin
-  rom_select  = 0;
   ram_select  = 0;
   gpio_select = 0;
   uart_select = 0;
 
-  if (address < 32'h00010000)
-    rom_select = 1;
-  else if (address < 32'h00020000)
+  if (data_address >= 64'h0001000 && data_address < 64'h00020000)
     ram_select = 1;
-  else if (address == 32'h20000000)
+  else if (data_address == 64'h20000000)
     gpio_select = 1;
-  else if (address == 32'h20000010)
+  else if (data_address == 64'h20000010)
     uart_select = 1;
 end 
 
@@ -108,7 +97,7 @@ always_comb begin
     uart_select:
       data_read = uart_read_data;
     default:
-      data_read = 32'h00000000;
+      data_read = 64'h00000000;
   endcase 
 end 
 

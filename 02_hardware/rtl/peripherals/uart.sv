@@ -14,12 +14,13 @@ module uart #(
 );
 
 localparam int CLKS_PER_BIT = CLK_FREQ / BAUD_RATE;
+localparam int BAUD_COUNTER_WIDTH = $clog2(CLKS_PER_BIT);
 localparam logic [63:0] UART_TX = 64'h20000010;
 
 logic [7:0] tx_data;
 logic       tx_busy;
 
-logic [$clog2(CLKS_PER_BIT)-1:0] baud_counter;
+logic [BAUD_COUNTER_WIDTH-1:0] baud_counter;
 logic [3:0] bit_index;
 
 always_ff @(posedge clk) begin
@@ -44,7 +45,7 @@ always_ff @(posedge clk) begin
 
   // transmitting
   else if (tx_busy) begin
-    if (baud_counter == CLKS_PER_BIT - 1) begin
+    if (baud_counter == CLKS_PER_BIT[BAUD_COUNTER_WIDTH-1:0]) begin
       baud_counter <= '0;
       
       case (bit_index)
