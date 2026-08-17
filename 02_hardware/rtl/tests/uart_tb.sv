@@ -9,6 +9,7 @@ module uart_tb;
   logic [63:0] rd_data;
 
   logic tx;
+  localparam int CLKS_PER_BIT = 10;
 
   uart #(
     .CLK_FREQ(10),
