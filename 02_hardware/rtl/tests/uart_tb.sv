@@ -29,7 +29,7 @@ module uart_tb;
   always #5 clk = ~clk;
 
   task check_bit (input logic expected);
-    repeat (CLKS_PER_BIT)
+    repeat (CLKS_PER_BIT / 2)
       @(posedge clk);
 
     assert(tx === expected)
@@ -38,6 +38,9 @@ module uart_tb;
         expected,
         tx  
       );
+
+    repeat (CLKS_PER_BIT / 2)
+      @(posedge clk);
   endtask
 
   initial begin
@@ -62,6 +65,9 @@ module uart_tb;
 
     @(posedge clk);
     wr_enable = 0;
+
+    assert(tx === 1'b0)
+    else $error("UART did not enter start bit");
 
     // checking uart 
     check_bit(1'b0);  // start
