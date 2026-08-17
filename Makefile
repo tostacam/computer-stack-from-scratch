@@ -3,6 +3,7 @@ sim:
 
 rtl: 
 	$(MAKE) -C 02_hardware/rtl cpu_compile
+	$(MAKE) -C 02_hardware/rtl soc_compile
 
 all: sim rtl
 

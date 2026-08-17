@@ -48,5 +48,14 @@ cpu_compile:
 		--exe tools/run_rtl_cpu.cpp \
 		--build
 
+soc_compile:
+	verilator \
+		-Isoc \
+		-Icpu \
+		--cc $(CPU_SRC) $(MEM_SRC) $(PER_SRC) soc/soc.sv \
+		--top-module soc \
+		--exe tools/run_rtl_soc.cpp \
+		--build
+
 clean: 
 	rm -rf xsim.dir *.log *.jou *.pb *.wdb *.vcd
