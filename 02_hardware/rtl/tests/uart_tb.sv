@@ -10,10 +10,10 @@ module uart_tb;
 
   logic tx;
 
-  uart#(
+  uart #(
     .CLK_FREQ(10),
     .BAUD_RATE(1)  
-  ) u_uart(
+  ) u_uart (
     .clk(clk),
     .reset(reset),
     .wr_enable(wr_enable),

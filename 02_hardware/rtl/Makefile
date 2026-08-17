@@ -37,7 +37,7 @@ test_cpu:
 test_uart:
 	xvlog --sv $(PER_SRC) tests/uart_tb.sv
 	xelab uart_tb -debug typical
-	xsim cpu_tb -runall
+	xsim uart_tb -runall
 
 cpu_compile:
 	verilator \

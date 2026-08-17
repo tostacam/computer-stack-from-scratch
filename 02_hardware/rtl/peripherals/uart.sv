@@ -8,12 +8,12 @@ module uart #(
   input  logic        wr_enable,
   input  logic [63:0] address,
   input  logic [63:0] wr_data,
-  output logic [63:0] rd_data
+  output logic [63:0] rd_data,
   // Serial
   output logic tx
 );
 
-local param int CLKS_PER_BIT = CLK_FREQ / BAUD_RATE;
+localparam int CLKS_PER_BIT = CLK_FREQ / BAUD_RATE;
 localparam logic [63:0] UART_TX = 64'h20000010;
 
 logic [7:0] tx_data;
@@ -43,7 +43,7 @@ always_ff @(posedge clk) begin
   end 
 
   // transmitting
-  else if (tx_bus) begin
+  else if (tx_busy) begin
     if (baud_counter == CLKS_PER_BIT - 1) begin
       baud_counter <= '0;
       
