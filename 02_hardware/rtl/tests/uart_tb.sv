@@ -5,7 +5,7 @@ module uart_tb;
 
   logic        wr_enable;
   logic [63:0] address;
-  logic [63:0] wt_data;
+  logic [63:0] wr_data;
   logic [63:0] rd_data;
 
   logic tx;
