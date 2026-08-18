@@ -4,7 +4,15 @@ module soc(
   output logic state,
   output logic [1:0] trap,
   input  logic uart_rx,
-  output logic uart_tx
+  output logic uart_tx,
+
+  // debug signals
+  output logic [63:0] debug_pc,
+  output logic [31:0] debug_instruction,
+  output logic [63:0] debug_rf [31:0],
+  output logic  [7:0] debug_ram [4096-1:0],
+  output logic [63:0] debug_imm,
+  output logic [63:0] debug_jmp_addr
 );
 
 // CPU <-> Instruction Bus
@@ -100,5 +108,13 @@ always_comb begin
       data_read = 64'h00000000;
   endcase 
 end 
+
+//debug signals
+assign debug_pc = u_cpu.pc;
+assign debug_instruction = u_cpu.instruction;
+assign debug_rf = u_cpu.u_rf.registers;
+assign debug_ram = u_ram.memory;
+assign debug_imm = u_cpu.u_imm_gen.immediate;
+assign debug_jmp_addr = u_cpu.u_pc.jump_address;
 
 endmodule 
