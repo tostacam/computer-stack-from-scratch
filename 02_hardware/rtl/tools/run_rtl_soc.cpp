@@ -78,8 +78,8 @@ void output_results(Vsoc *soc, const char *filename) {
   }
   fprintf(fp, "  },\n");
   fprintf(fp, "  \"memory\": {\n");
-  for (int i = 0; i < 16; ++i) {
-    fprintf(fp, "    \"0x000%x\": %d%s\n", i, soc->debug_ram[i], (i == 15) ? "" : ",");
+  for (int i = 10000; i < 10004; ++i) {
+    fprintf(fp, "    \"0x%d\": %d%s\n", i, soc->debug_ram[i], (i == 10004-1) ? "" : ",");
   }
   /*
   fprintf(fp, "    \"0x0000\": %d,\n", ram_word(cpu, 0));
