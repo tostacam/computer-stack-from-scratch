@@ -1,5 +1,7 @@
 // CPU + ROM + RAM (for regression testing)
 
+`include "mem_params.svh"
+
 module cpu_system(
   input  logic clk,
   input  logic reset,
@@ -9,7 +11,7 @@ module cpu_system(
   output logic [63:0] debug_pc,
   output logic [31:0] debug_instruction,
   output logic [63:0] debug_rf [31:0],
-  output logic  [7:0] debug_ram [4096-1:0],
+  output logic  [7:0] debug_ram [`RAM_SIZE-1:0],
   output logic [63:0] debug_imm,
   output logic [63:0] debug_jmp_addr
 );

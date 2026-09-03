@@ -43,6 +43,7 @@ cpu_compile:
 	verilator \
 		-Isoc \
 		-Icpu \
+		-Imemory \
 		--cc $(CPU_SRC) $(MEM_SRC) soc/cpu_system.sv \
 		--top-module cpu_system \
 		--exe tools/run_rtl_cpu.cpp \
@@ -52,6 +53,7 @@ soc_compile:
 	verilator \
 		-Isoc \
 		-Icpu \
+		-Imemory \
 		--cc $(CPU_SRC) $(MEM_SRC) $(PER_SRC) soc/soc.sv \
 		--top-module soc \
 		--exe tools/run_rtl_soc.cpp \

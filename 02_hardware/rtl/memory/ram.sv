@@ -1,5 +1,7 @@
+`include "mem_params.svh"
+
 module ram #(
-  parameter MEM_SIZE = 4096  
+  parameter MEM_SIZE = `RAM_SIZE // 64kB memory
 )(
   input  logic        clk,
   input  logic [2:0]  word_size,
