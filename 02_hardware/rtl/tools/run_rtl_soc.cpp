@@ -2,8 +2,10 @@
 #include "Vsoc.h"
 #include <iostream>
 
-#define MAX_CYCLES  100
-#define CPU_RUNNING 0
+#define MAX_CYCLES    100
+#define CPU_RUNNING   0
+#define SOC_MEM_SIZE  4
+#define SOC_MEM_START 0
 
 void tick(Vsoc *soc);
 void reset(Vsoc *soc); 
@@ -78,15 +80,9 @@ void output_results(Vsoc *soc, const char *filename) {
   }
   fprintf(fp, "  },\n");
   fprintf(fp, "  \"memory\": {\n");
-  for (int i = 10000; i < 10004; ++i) {
-    fprintf(fp, "    \"0x%d\": %d%s\n", i, soc->debug_ram[i], (i == 10004-1) ? "" : ",");
+  for (int i = SOC_MEM_START; i < SOC_MEM_START + SOC_MEM_SIZE; ++i) {
+    fprintf(fp, "    \"0x%05d\": %d%s\n", i, ram_word(soc, i), (i == SOC_MEM_START + SOC_MEM_SIZE - 1) ? "" : ",");
   }
-  /*
-  fprintf(fp, "    \"0x0000\": %d,\n", ram_word(cpu, 0));
-  fprintf(fp, "    \"0x0004\": %d,\n", ram_word(cpu, 4));
-  fprintf(fp, "    \"0x0008\": %d,\n", ram_word(cpu, 8));
-  fprintf(fp, "    \"0x000C\": %d\n", ram_word(cpu, 12));
-  */
   fprintf(fp, "  }\n");
   fprintf(fp, "}\n");
   fclose(fp);

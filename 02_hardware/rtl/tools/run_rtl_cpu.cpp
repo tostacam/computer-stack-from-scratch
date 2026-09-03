@@ -2,8 +2,10 @@
 #include "Vcpu_system.h"
 #include <iostream>
 
-#define MAX_CYCLES  100
-#define CPU_RUNNING 0
+#define MAX_CYCLES    100
+#define CPU_RUNNING   0
+#define RAM_PRT_SIZE  16
+#define RAM_PRT_START 0
 
 void tick(Vcpu_system *cpu);
 void reset(Vcpu_system *cpu); 
@@ -78,15 +80,9 @@ void output_results(Vcpu_system *cpu, const char *filename) {
   }
   fprintf(fp, "  },\n");
   fprintf(fp, "  \"memory\": {\n");
-  for (int i = 0; i < 16; ++i) {
-    fprintf(fp, "    \"0x000%x\": %d%s\n", i, cpu->debug_ram[i], (i == 15) ? "" : ",");
+  for (int i = RAM_PRT_START; i < RAM_PRT_START + RAM_PRT_SIZE; ++i) {
+    fprintf(fp, "    \"0x%04x\": %d%s\n", i, cpu->debug_ram[i], (i == RAM_PRT_START + RAM_PRT_SIZE - 1) ? "" : ",");
   }
-  /*
-  fprintf(fp, "    \"0x0000\": %d,\n", ram_word(cpu, 0));
-  fprintf(fp, "    \"0x0004\": %d,\n", ram_word(cpu, 4));
-  fprintf(fp, "    \"0x0008\": %d,\n", ram_word(cpu, 8));
-  fprintf(fp, "    \"0x000C\": %d\n", ram_word(cpu, 12));
-  */
   fprintf(fp, "  }\n");
   fprintf(fp, "}\n");
   fclose(fp);
