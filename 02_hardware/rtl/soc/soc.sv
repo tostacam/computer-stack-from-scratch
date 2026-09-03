@@ -1,3 +1,5 @@
+`include "mem_params.svh"
+
 module soc(
   input  logic clk,
   input  logic reset,
@@ -10,7 +12,7 @@ module soc(
   output logic [63:0] debug_pc,
   output logic [31:0] debug_instruction,
   output logic [63:0] debug_rf [31:0],
-  output logic  [7:0] debug_ram [4096-1:0],
+  output logic  [7:0] debug_ram [`RAM_SIZE-1:0],
   output logic [63:0] debug_imm,
   output logic [63:0] debug_jmp_addr
 );
@@ -65,7 +67,7 @@ ram u_ram(
   .word_size(u_cpu.word_size),
   .wr_enable(mem_write && ram_select),
   .rd_enable(mem_read && ram_select),
-  .address(data_address),
+  .address(data_address - 64 'h00010000),
   .wr_data(data_write),
   .rd_data(ram_read_data)
 );
@@ -87,7 +89,7 @@ always_comb begin
   gpio_select = 0;
   uart_select = 0;
 
-  if (data_address >= 64'h0001000 && data_address < 64'h00020000)
+  if (data_address >= 64'h00010000 && data_address < 64'h00020000)
     ram_select = 1;
   else if (data_address == 64'h20000000)
     gpio_select = 1;
