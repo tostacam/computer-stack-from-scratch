@@ -11,6 +11,7 @@ void tick(Vsoc *soc);
 void reset(Vsoc *soc); 
 void SOC_run(Vsoc *soc);
 void output_results(Vsoc *soc, const char *filename);
+uint8_t capture_uart(Vsoc *soc);
 
 int main(int argc, char *argv[]) {
   if (argc != 4) {
@@ -87,3 +88,31 @@ void output_results(Vsoc *soc, const char *filename) {
   fprintf(fp, "}\n");
   fclose(fp);
 }
+
+uint8_t capture_uart(Vsoc* soc) {
+  const int CLKS_PER_BIT = 100'000'000 / 115'200;
+  
+  // uart is idle
+  while (soc->uart_tx == 1) {
+    tick(soc);
+  }
+
+  for (int i = 0; i < CLKS_PER_BIT + CLKS_PER_BIT/2; ++i) {
+    tick(soc);
+  }
+
+  uint8_t data = 0;
+
+  // capturing 8 bits
+  for (int bit = 0; bit < 8; ++ bit) {
+    if (soc->uart_tx) {
+      data |= (1 << bit);
+    }
+
+    for (int i = 0; i < CLKS_PER_BIT; ++i) {
+      tick(soc);
+    }
+  }
+
+  return data;
+} 
