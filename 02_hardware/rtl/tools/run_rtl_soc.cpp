@@ -1,17 +1,22 @@
 #include <verilated.h>
 #include "Vsoc.h"
 #include <iostream>
+#include <vector>
 
 #define MAX_CYCLES    10'000
 #define CPU_RUNNING   0
 #define SOC_MEM_SIZE  4
 #define SOC_MEM_START 0
 
+struct SOC_data {
+  Vsoc system;
+  uint8_t uart;
+};
+
 void tick(Vsoc *soc);
 void reset(Vsoc *soc); 
-void SOC_run(Vsoc *soc);
-void output_results(Vsoc *soc, const char *filename);
-uint8_t capture_uart(Vsoc *soc);
+void SOC_run(SOC_data *soc);
+void output_results(Vsoc *soc, uint8_t *uart, const char *filename);
 
 int main(int argc, char *argv[]) {
   if (argc != 3) {
@@ -21,22 +26,14 @@ int main(int argc, char *argv[]) {
 
   // SOC init
   Verilated::commandArgs(argc, argv);
-  Vsoc soc;
-  reset(&soc);
+  SOC_data soc;
+  reset(&soc.system);
 
   // SOC run
   SOC_run(&soc);
-  uint8_t uart_data = 0;//capture_uart(&soc);
-
-  // UART
-  if (uart_data != 0x41) {
-    printf("  *UART test failed!\n");
-  } else {
-    printf("  *UART test passed!\n");
-  }
 
   // Output
-  output_results(&soc, argv[2]);
+  output_results(&soc.system, &soc.uart, argv[2]);
 }
 
 void tick(Vsoc *soc) {
@@ -54,16 +51,41 @@ void reset(Vsoc *soc) {
   soc->reset = 0;
 }
 
-void SOC_run(Vsoc *soc) {
+void SOC_run(SOC_data *soc) {
+  const int CLKS_PER_BIT = 100'000'000 / 115'200;
+
   int cycles = 0;
 
-  while (soc->state == CPU_RUNNING && cycles < MAX_CYCLES) {
-    tick(soc);
+  while (soc->system.uart_tx == 1 && cycles < MAX_CYCLES) {
+    tick(&soc->system);
     ++cycles;
   }
 
   if (cycles == MAX_CYCLES) {
     printf("RTL test timed out\n");
+    soc->uart = 0x30;
+    return;
+  } else {
+    // middle of first data bit
+    for (int i = 0; i < CLKS_PER_BIT + CLKS_PER_BIT/2; ++i) {
+      tick(&soc->system);
+      ++cycles;
+    }
+
+    soc->uart = 0;
+
+    // capturing 8 data bits
+    for (int bit = 0; bit < 8; ++bit) {
+      if (soc->system.uart_tx) {
+        soc->uart |= (1 << bit);
+      }
+
+      for (int i = 0; i < CLKS_PER_BIT; ++i) {
+        tick(&soc->system);
+        ++cycles;
+      }
+    }
+
   }
 }
 
@@ -78,7 +100,7 @@ int ram_word(Vsoc *soc, int i) {
   return word;
 }
 
-void output_results(Vsoc *soc, const char *filename) {
+void output_results(Vsoc *soc, uint8_t *uart, const char *filename) {
   FILE *fp = fopen(filename, "w");
 
   fprintf(fp, "{\n");
@@ -92,35 +114,9 @@ void output_results(Vsoc *soc, const char *filename) {
   for (int i = SOC_MEM_START; i < SOC_MEM_START + SOC_MEM_SIZE; ++i) {
     fprintf(fp, "    \"0x%05d\": %d%s\n", i, ram_word(soc, i), (i == SOC_MEM_START + SOC_MEM_SIZE - 1) ? "" : ",");
   }
-  fprintf(fp, "  }\n");
+  fprintf(fp, "  },\n");
+  fprintf(fp, "  \"uart\": \"%c\"\n", static_cast<int>(*uart));
   fprintf(fp, "}\n");
   fclose(fp);
 }
-
-uint8_t capture_uart(Vsoc* soc) {
-  const int CLKS_PER_BIT = 100'000'000 / 115'200;
-  
-  // uart is idle
-  while (soc->uart_tx == 1) {
-    tick(soc);
-  }
-
-  for (int i = 0; i < CLKS_PER_BIT + CLKS_PER_BIT/2; ++i) {
-    tick(soc);
-  }
-
-  uint8_t data = 0;
-
-  // capturing 8 bits
-  for (int bit = 0; bit < 8; ++ bit) {
-    if (soc->uart_tx) {
-      data |= (1 << bit);
-    }
-
-    for (int i = 0; i < CLKS_PER_BIT; ++i) {
-      tick(soc);
-    }
-  }
-
-  return data;
-} 
+ 
