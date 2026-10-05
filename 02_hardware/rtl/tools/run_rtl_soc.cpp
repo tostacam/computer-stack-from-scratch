@@ -2,7 +2,7 @@
 #include "Vsoc.h"
 #include <iostream>
 
-#define MAX_CYCLES    100
+#define MAX_CYCLES    10'000
 #define CPU_RUNNING   0
 #define SOC_MEM_SIZE  4
 #define SOC_MEM_START 0
@@ -14,21 +14,29 @@ void output_results(Vsoc *soc, const char *filename);
 uint8_t capture_uart(Vsoc *soc);
 
 int main(int argc, char *argv[]) {
-  if (argc != 4) {
-    printf("Need input/output file: <program.cpp> +ROM=<input.hex> +CYCLES=n <output.json>\n");
+  if (argc != 3) {
+    printf("Need input/output file: <program.cpp> +ROM=<input.hex> <output.json>\n");
     return 1;
   }
 
-  // CPU init
+  // SOC init
   Verilated::commandArgs(argc, argv);
   Vsoc soc;
   reset(&soc);
 
-  // CPU run
+  // SOC run
   SOC_run(&soc);
+  uint8_t uart_data = 0;//capture_uart(&soc);
+
+  // UART
+  if (uart_data != 0x41) {
+    printf("  *UART test failed!\n");
+  } else {
+    printf("  *UART test passed!\n");
+  }
 
   // Output
-  output_results(&soc, argv[3]);
+  output_results(&soc, argv[2]);
 }
 
 void tick(Vsoc *soc) {

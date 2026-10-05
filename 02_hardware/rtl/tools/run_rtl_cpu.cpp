@@ -13,8 +13,8 @@ void CPU_run(Vcpu_system *cpu);
 void output_results(Vcpu_system *cpu, const char *filename);
 
 int main(int argc, char *argv[]) {
-  if (argc != 4) {
-    printf("Need input/output file: <program.cpp> +ROM=<input.hex> +CYCLES=n <output.json>\n");
+  if (argc != 3) {
+    printf("Need input/output file: <program.cpp> +ROM=<input.hex> <output.json>\n");
     return 1;
   }
 
@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
   CPU_run(&cpu);
 
   // Output
-  output_results(&cpu, argv[3]);
+  output_results(&cpu, argv[2]);
 }
 
 void tick(Vcpu_system *cpu) {

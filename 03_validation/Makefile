@@ -1,5 +1,6 @@
 run_all_tests:
-	python3 run_tests.py
+	python3 run_cpu_tests.py
+	python3 run_soc_tests.py
 
 run_solo_test:
 	python3 solo_test.py
