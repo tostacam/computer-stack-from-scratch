@@ -1,4 +1,4 @@
-from common import assemble, run_soc_rtl, test_status, compare_cpu
+from common import assemble, run_soc_rtl, test_status, compare_soc
 from common import SOC_PROGS, HEX_FILES, RESULTS 
 from common import RED, GREEN, PINK, CYAN, RESET
 from pathlib import Path
@@ -22,9 +22,10 @@ def validate_soc():
 
     # soc rtl
     run_soc_rtl(base)
-    soc_pass = compare_cpu(
+    soc_pass = compare_soc(
       SOC_PROGS / f"{base}.expected.json",
       RESULTS / f"{base}.rtl.json")
+
     tests_total += 1
     if soc_pass:
       tests_passed += 1

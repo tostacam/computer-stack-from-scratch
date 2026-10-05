@@ -31,6 +31,7 @@ def validate_cpu():
     sim_pass = compare_cpu(
       CPU_PROGS / f"{base}.expected.json", 
       RESULTS / f"{base}.sim.json")
+
     tests_total  += 1
     if sim_pass:
       tests_passed += 1

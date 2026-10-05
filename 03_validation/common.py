@@ -39,8 +39,6 @@ def run_cpu_sim(base):
   ]) 
 
 def run_cpu_rtl(base):
-  num_instr = sum(1 for line in open(f"{HEX_FILES}/{base}.hex") if line.strip())
-
   subprocess.run([
     CPU_RTL,
     f"+ROM={HEX_FILES}/{base}.hex",
@@ -48,8 +46,6 @@ def run_cpu_rtl(base):
   ])
 
 def run_soc_rtl(base):
-  num_instr = sum(1 for line in open(f"{HEX_FILES}/{base}.hex") if line.strip())
-
   subprocess.run([
     SOC_RTL,
     f"+ROM={HEX_FILES}/{base}.hex",
@@ -77,6 +73,28 @@ def compare_cpu(expected_file, result_file):
 
   return True
 
+def compare_soc(expected_file, result_file):
+  expected = json.load(open(expected_file))
+  result   = json.load(open(result_file))
+
+  # PC
+  if "pc" in expected:
+    if result["pc"] != expected["pc"]: 
+      return False
+
+  # Registers
+  for reg, val in expected.get("registers", {}).items():
+    if (result["registers"][reg] & MASK_64BIT) != (val & MASK_64BIT):
+      return False
+
+  # Memory
+  for addr, val, in expected.get("memory", {}).items():
+    if result["memory"][addr] != val:
+      return False
+
+  return True
+ 
 def test_status(passed):
   if passed:
     return f"{GREEN}✓ PASS{RESET}"
+  return f"{RED}✗ FAIL{RESET}"
