@@ -1,5 +1,4 @@
-from common import assemble, run_sim, run_rtl, test_status, compare_cpu
-from common import ROOT, ASSEMBLER, SIM, RTL, SOC
+from common import assemble, run_cpu_sim, run_cpu_rtl, test_status, compare_cpu
 from common import CPU_PROGS, HEX_FILES, RESULTS 
 from common import RED, GREEN, PINK, CYAN, RESET
 from pathlib import Path
@@ -27,8 +26,8 @@ def validate_cpu():
     # asm
     assemble(base, CPU_PROGS)
 
-    # sim
-    run_sim(base)
+    # cpu sim
+    run_cpu_sim(base)
     sim_pass = compare_cpu(
       CPU_PROGS / f"{base}.expected.json", 
       RESULTS / f"{base}.sim.json")
@@ -36,8 +35,8 @@ def validate_cpu():
     if sim_pass:
       tests_passed += 1
 
-    # rtl - cpu
-    run_rtl(base, RTL)
+    # cpu rtl
+    run_cpu_rtl(base)
     rtl_pass = compare_cpu(
       CPU_PROGS / f"{base}.expected.json", 
       RESULTS / f"{base}.rtl.json")

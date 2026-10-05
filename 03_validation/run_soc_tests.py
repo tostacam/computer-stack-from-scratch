@@ -1,5 +1,4 @@
-from common import assemble, run_sim, run_rtl, test_status, compare_cpu
-from common import ROOT, ASSEMBLER, SIM, RTL, SOC
+from common import assemble, run_soc_rtl, test_status, compare_cpu
 from common import SOC_PROGS, HEX_FILES, RESULTS 
 from common import RED, GREEN, PINK, CYAN, RESET
 from pathlib import Path
@@ -21,8 +20,8 @@ def validate_soc():
     # asm
     assemble(base, SOC_PROGS)
 
-    # rtl - soc
-    run_rtl(base, SOC)
+    # soc rtl
+    run_soc_rtl(base)
     soc_pass = compare_cpu(
       SOC_PROGS / f"{base}.expected.json",
       RESULTS / f"{base}.rtl.json")

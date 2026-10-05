@@ -5,9 +5,9 @@ import json
 # executables
 ROOT = Path(__file__).resolve().parent.parent
 ASSEMBLER = ROOT / "01_software" / "asm" / "assembler.py"
-SIM       = ROOT / "01_software" / "sim" / "tools" / "run_sim_cpu"
-RTL       = ROOT / "02_hardware" / "rtl" / "obj_dir" / "Vcpu_system"
-SOC       = ROOT / "02_hardware" / "rtl" / "obj_dir" / "Vsoc"
+CPU_SIM   = ROOT / "01_software" / "sim" / "tools" / "run_sim_cpu"
+CPU_RTL   = ROOT / "02_hardware" / "rtl" / "obj_dir" / "Vcpu_system"
+SOC_RTL   = ROOT / "02_hardware" / "rtl" / "obj_dir" / "Vsoc"
 
 # folders
 CPU_PROGS = ROOT / "03_validation" / "cpu_programs"
@@ -31,18 +31,27 @@ def assemble(base, folder):
     HEX_FILES / f"{base}.hex"
   ])
 
-def run_sim(base):
+def run_cpu_sim(base):
   subprocess.run([
-    SIM,
+    CPU_SIM,
     HEX_FILES / f"{base}.hex",
     RESULTS / f"{base}.sim.json"
   ]) 
 
-def run_rtl(base, component):
+def run_cpu_rtl(base):
   num_instr = sum(1 for line in open(f"{HEX_FILES}/{base}.hex") if line.strip())
 
   subprocess.run([
-    component,
+    CPU_RTL,
+    f"+ROM={HEX_FILES}/{base}.hex",
+    RESULTS / f"{base}.rtl.json"
+  ])
+
+def run_soc_rtl(base):
+  num_instr = sum(1 for line in open(f"{HEX_FILES}/{base}.hex") if line.strip())
+
+  subprocess.run([
+    SOC_RTL,
     f"+ROM={HEX_FILES}/{base}.hex",
     RESULTS / f"{base}.rtl.json"
   ])
