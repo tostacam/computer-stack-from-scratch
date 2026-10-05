@@ -3,20 +3,20 @@
 #include <iostream>
 #include <vector>
 
-#define MAX_CYCLES    10'000
+#define MAX_CYCLES    100'000
 #define CPU_RUNNING   0
 #define SOC_MEM_SIZE  4
 #define SOC_MEM_START 0
 
 struct SOC_data {
   Vsoc system;
-  uint8_t uart;
+  std::vector<uint8_t> uart;
 };
 
 void tick(Vsoc *soc);
 void reset(Vsoc *soc); 
 void SOC_run(SOC_data *soc);
-void output_results(Vsoc *soc, uint8_t *uart, const char *filename);
+void output_results(Vsoc *soc, std::vector<uint8_t> *uart, const char *filename);
 
 int main(int argc, char *argv[]) {
   if (argc != 3) {
@@ -55,28 +55,32 @@ void SOC_run(SOC_data *soc) {
   const int CLKS_PER_BIT = 100'000'000 / 115'200;
 
   int cycles = 0;
+  uint8_t uart_data = 0;
 
-  while (soc->system.uart_tx == 1 && cycles < MAX_CYCLES) {
-    tick(&soc->system);
-    ++cycles;
-  }
+  while (cycles < MAX_CYCLES) {
 
-  if (cycles == MAX_CYCLES) {
-    soc->uart = 0x30;
-    return;
-  } else {
+    // run until UART is set to low
+    while (soc->system.uart_tx == 1 && cycles < MAX_CYCLES) {
+      tick(&soc->system);
+      ++cycles;
+    }
+
+    if (cycles == MAX_CYCLES) {
+      return;
+    }
+
     // middle of first data bit
     for (int i = 0; i < CLKS_PER_BIT + CLKS_PER_BIT/2; ++i) {
       tick(&soc->system);
       ++cycles;
     }
 
-    soc->uart = 0;
+    uart_data = 0;
 
     // capturing 8 data bits
     for (int bit = 0; bit < 8; ++bit) {
       if (soc->system.uart_tx) {
-        soc->uart |= (1 << bit);
+        uart_data |= (1 << bit);
       }
 
       for (int i = 0; i < CLKS_PER_BIT; ++i) {
@@ -85,6 +89,7 @@ void SOC_run(SOC_data *soc) {
       }
     }
 
+    soc->uart.push_back(uart_data);
   }
 }
 
@@ -99,7 +104,7 @@ int ram_word(Vsoc *soc, int i) {
   return word;
 }
 
-void output_results(Vsoc *soc, uint8_t *uart, const char *filename) {
+void output_results(Vsoc *soc, std::vector<uint8_t> *uart, const char *filename) {
   FILE *fp = fopen(filename, "w");
 
   fprintf(fp, "{\n");
@@ -114,7 +119,16 @@ void output_results(Vsoc *soc, uint8_t *uart, const char *filename) {
     fprintf(fp, "    \"0x%05d\": %d%s\n", i, ram_word(soc, i), (i == SOC_MEM_START + SOC_MEM_SIZE - 1) ? "" : ",");
   }
   fprintf(fp, "  },\n");
-  fprintf(fp, "  \"uart\": \"%c\"\n", static_cast<int>(*uart));
+  if (uart->empty()) {
+    fprintf(fp, "  \"uart\": \"\"\n");
+  }
+  else {
+    fprintf(fp, "  \"uart\": \"");
+    for (auto c : *uart) {
+      fprintf(fp, "%c", static_cast<int>(c));
+    }
+    fprintf(fp, "\"\n");
+  }
   fprintf(fp, "}\n");
   fclose(fp);
 }
