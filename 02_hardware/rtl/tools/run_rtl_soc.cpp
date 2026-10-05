@@ -62,7 +62,6 @@ void SOC_run(SOC_data *soc) {
   }
 
   if (cycles == MAX_CYCLES) {
-    printf("RTL test timed out\n");
     soc->uart = 0x30;
     return;
   } else {

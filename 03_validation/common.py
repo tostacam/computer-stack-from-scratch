@@ -92,6 +92,11 @@ def compare_soc(expected_file, result_file):
     if result["memory"][addr] != val:
       return False
 
+  # UART
+  if "uart" in expected:
+    if result["uart"] != expected["uart"]:
+      return False
+
   return True
  
 def test_status(passed):
