@@ -1,6 +1,13 @@
 import sys
 from instruction_table import instruction_table
 
+SECTION_BASES = {
+  ".text":    0x000,
+  ".data":    0x100,
+  ".rodata":  0x200,
+  ".bss":     0x300,
+}
+
 def register_number(register):
   return int(register[1:])
 
@@ -34,25 +41,83 @@ def tokenize(program):
 
 def first_pass(tokens):
   symbol_table = {}
-  pc = 0
+  section_offsets = {section: 0 for section in SECTION_BASES}
+  section_current = ".text"
 
   for token in tokens:
+    # defintion / constant
+    if len(token) == 3 and token[1] == "=":
+      symbol_table[token[0]] = int(token[2], 0)
+      continue
+
+    # section change
+    if len(token) == 1 and token[0] in SECTION_BASES:
+      section_current = token[0]
+      continue
+
+    # labels within section
     if token[0].endswith(":"):
-      symbol_table[token[0].strip(":")] = pc
+      symbol_table[token[0].strip(":")] = (
+        SECTION_BASES[section_current]
+        + section_offsets[section_current]
+      )
+
+      token = token[1:]
+
+      if not token:
+        continue
+
+    # data types
+    if token[0] == ".word": 
+      section_offsets[section_current] += 4
+    elif token[0] == ".half":
+      section_offsets[section_current] += 2
+    elif token[0] == ".byte":
+      section_offsets[section_current] += 1
+    elif token[0] == ".space":
+      section_offsets[section_current] += int(token[1], 0)
     else:
-      pc += 4
+      section_offsets[section_current] += 4
 
   return symbol_table
 
+def resolve_value(value, symbol_table):
+  if value in symbol_table:
+    return symbol_table[value]
+
+  return int(value, 0)
+
 def parse(tokens, symbol_table):
   instructions = []
+  section_current = ".text"
 
   for token in tokens:
-    if token[0].endswith(":"):
+    # section change
+    if len(token) == 1 and token[0] in SECTION_BASES:
+      section_current = token[0]
       continue
 
-    mnemonic = token[0]
+    # definition / constant
+    if len(token) == 3 and token[1] == "=":
+      continue
 
+    # labels within section
+    if token[0].endswith(":"):
+      token = token[1:]
+
+      if not token:
+        continue
+
+    # data types
+    if token[0] in [".word", ".half", ".byte", ".space"]:
+      continue
+
+    if section_current != ".text":
+      raise ValueError(
+        f"no instruction allowed outside of .text for now"
+      )
+
+    mnemonic = token[0]
     isa_data = instruction_table[mnemonic]
     instruction_type = isa_data["type"]
 
@@ -71,7 +136,7 @@ def parse(tokens, symbol_table):
           "mnemonic": mnemonic,
           "rd"      : register_number(token[1]),
           "rs1"     : register_number(token[2]),
-          "imm"     : int(token[3], 0)
+          "imm"     : resolve_value(token[3], symbol_table)
         }
       elif isa_data["I-type"] == "offset":
         instruction = {
@@ -79,7 +144,7 @@ def parse(tokens, symbol_table):
           "mnemonic": mnemonic,
           "rd"      : register_number(token[1]),
           "rs1"     : register_number(token[3]),
-          "imm"     : int(token[2], 0)
+          "imm"     : resolve_value(token[2], symbol_table)
         }
       elif isa_data["I-type"] == "system":
         instruction = {
@@ -94,7 +159,7 @@ def parse(tokens, symbol_table):
         "type"    : "S",
         "mnemonic": mnemonic,
         "rs2"     : register_number(token[1]),
-        "imm"     : int(token[2], 0),
+        "imm"     : resolve_value(token[2], symbol_table),
         "rs1"     : register_number(token[3])
       }
     elif instruction_type == "B":
@@ -110,7 +175,7 @@ def parse(tokens, symbol_table):
         "type"    : "U",
         "mnemonic": mnemonic,
         "rd"      : register_number(token[1]),
-        "imm"     : int(token[2], 0)
+        "imm"     : resolve_value(token[2], symbol_table)
       }
     elif instruction_type == "J":
       instruction = {
