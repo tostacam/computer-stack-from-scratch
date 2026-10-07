@@ -79,7 +79,7 @@ These control signals
     - `PC_JALR` = `11`
 - `alu_op`: selects the ALU operation.
 
-### 5.1 Control Unit
+### 5.1 Control Unit (Truth Table)
 
 | Type | `alu_src_a` | `alu_src_b` | `wb_src` | `reg_write` | `mem_read` | `mem_write` | `pc_src` | `alu_op` |
 |:-----|:------:|:--------:|:--------:|:-------:|:--------:|:------:|:-----:|:-------------:|
@@ -96,15 +96,15 @@ These control signals
 
 ---
 
-### 5.2 Immediate Control Unit
+### 5.2 Immediate Control Unit (Truth Table)
 
 ---
 
-### 5.3 ALU Control Unit
+### 5.3 ALU Control Unit (Truth Table)
 
-| Type| alu_op | funct3 | ALU Opcode |
-|:----|:------:|:------:|:-----------|
-| ADD                     | `000` | `xxx` | `ALU_OP_ADD` |
+| Type| `alu_op` | `funct3` | ALU Opcode |
+|:----|:--------:|:--------:|:-----------|
+| ADD                     | `000` | `XXX` | `ALU_OP_ADD` |
 | R-type (`sub`, `add`)   | `001` | `000` | (`funct7` == `0100000`) ? `ALU_OP_SUB` : `ALU_OP_ADD` |
 | R-type (`sll`)          | `001` | `001` | `ALU_OP_SLL` |
 | R-type (`slt`)          | `001` | `010` | `ALU_OP_SLT` |
@@ -124,23 +124,33 @@ These control signals
 | I-type (`srli`, `srai`) | `011` | `101` | (`funct7` == `0100000`) ? `ALU_OP_SRA` : `ALU_OP_SRL` |
 | I-type (`ori`)          | `011` | `110` | `ALU_OP_OR` |
 | I-type (`andi`)         | `011` | `111` | `ALU_OP_AND` |
-| U-type (`lui`)          | `100` | `xxx` | `ALU_OP_PASS_B` |
-| U-type (`auipc`)        | `101` | `xxx` | `ALU_OP_ADD` |
-| J-type (`jal`, `jalr`)  | `110` | `xxx` | `ALU_OP_ADD` |
-| SYSTEM (`ebreak`, `ecall`) | `111` | `xxx` | `ALU_OP_PASS_B` |
+| U-type (`lui`)          | `100` | `XXX` | `ALU_OP_PASS_B` |
+| U-type (`auipc`)        | `101` | `XXX` | `ALU_OP_ADD` |
+| J-type (`jal`, `jalr`)  | `110` | `XXX` | `ALU_OP_ADD` |
+| SYSTEM (`ebreak`, `ecall`) | `111` | `XXX` | `ALU_OP_PASS_B` |
 
 ---
 
-### 5.4 Branch Control Unit
+### 5.4 Branch Control Unit (Truth Table)
+
+| `pc_src` | `funct3` | `jump_enable` | `jump_address` |
+|:--------:|:--------:|:-------------:|:--------------:|
+| `PC_NEXT`    | `XXX` | `0` | `pc` + `immediate` |
+| `PC_BRANCH`  | `000` | `alu_zero`        | `pc` + `immediate` |
+| `PC_BRANCH`  | `001` | !(`alu_zero`)     | `pc` + `immediate` |
+| `PC_BRANCH`  | `100` | (`alu_result` == 1) | `pc` + `immediate` |
+| `PC_BRANCH`  | `101` | (`alu_result` == 0) | `pc` + `immediate` |
+| `PC_BRANCH`  | `110` | (`alu_result` == 1) | `pc` + `immediate` |
+| `PC_BRANCH`  | `111` | (`alu_result` == 0) | `pc` + `immediate` |
+| `PC_JAL`     | `XXX` | (`alu_result` == 1) | `pc` + `immediate` |
+| `PC_JALR`    | `XXX` | (`alu_result` == 0) | (`rs1_data` + `immediate`) & ~1 |
 
 ---
 
-### 5.5 PC Update
+### 5.5 Write Back to Register File (Truth Table)
 
-| Branch | Zero | Next PC |
-|:------:|:----:|---------|
-| 0 | X | PC + 4 |
-| 1 | 0 | PC + 4 |
-| 1 | 1 | Branch Target |
-
-# Single-Cycle CPU Control Signals
+| `wb_src` | `rf_wr_data` |
+|:--------:|:------------:|
+| `00` | `alu_result` |
+| `01` | `ram_data` |
+| `10` | `pc` + 4 |
