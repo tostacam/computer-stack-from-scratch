@@ -2,7 +2,7 @@
 
 | Component | Specification |
 |----------|---------------|
-| ISA | RISC-V (RV64I) |
+| ISA | RISC-V (inspired) |
 | Data Width | 64-bit |
 | Address Width | 32-bit |
 | RAM | 64KB |
