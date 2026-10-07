@@ -63,19 +63,26 @@ list of instructions
 
 These control signals
 
-- alu_src_a
-- alu_src_b
-- wb_src
-- reg_write
-- mem_read
-- mem_write
-- pc_src
-- alu_op
+- `alu_src_a`: selects data for ALU_A input.
+- `alu_src_b`: selects data for ALU_B input.
+- `wb_src`: selects the component for a write back to register file.
+    - `WB_ALU` = `00`
+    - `WB_MEM` = `01`
+    - `WB_PC4` = `10`
+- `reg_write`: signals 'write' to the register file.
+- `mem_read`: signals 'read' to RAM.
+- `mem_write`: signals 'write' to RAM.
+- `pc_src`: sets the program counter's `jump_enable` and `jump_address`.
+    - `PC_NEXT` = `00`
+    - `PC_BRANCH` = `01`
+    - `PC_JAL` = `10`
+    - `PC_JALR` = `11`
+- `alu_op`: selects the ALU operation.
 
 ### 5.1 Control Unit
 
 | Type | `alu_src_a` | `alu_src_b` | `wb_src` | `reg_write` | `mem_read` | `mem_write` | `pc_src` | `alu_op` |
-|:----:|:------:|:--------:|:--------:|:-------:|:--------:|:------:|:-----:|:-------------:|
+|:-----|:------:|:--------:|:--------:|:-------:|:--------:|:------:|:-----:|:-------------:|
 | R-type         | 0 | 0 | `00` | 1 | 0 | 0 | `00` | `001` |
 | I-type         | 0 | 1 | `00` | 1 | 0 | 0 | `00` | `011` |
 | S-type (LOAD)  | 0 | 1 | `01` | 1 | 1 | 0 | `00` | `000` |
@@ -95,12 +102,32 @@ These control signals
 
 ### 5.3 ALU Control Unit
 
-| ALUOp | Meaning |
-|:-----:|---------|
-| 00 | Add (address calculation) |
-| 01 | Subtract / Compare (branches) |
-| 10 | Decode funct3/funct7 |
-| 11 | Reserved |
+| Type| alu_op | funct3 | ALU Opcode |
+|:----|:------:|:------:|:-----------|
+| ADD                     | `000` | `xxx` | `ALU_OP_ADD` |
+| R-type (`sub`, `add`)   | `001` | `000` | (`funct7` == `0100000`) ? `ALU_OP_SUB` : `ALU_OP_ADD` |
+| R-type (`sll`)          | `001` | `001` | `ALU_OP_SLL` |
+| R-type (`slt`)          | `001` | `010` | `ALU_OP_SLT` |
+| R-type (`sltu`)         | `001` | `011` | `ALU_OP_SLTU` |
+| R-type (`xor`)          | `001` | `100` | `ALU_OP_XOR` |
+| R-type (`sra`, `srl`)   | `001` | `101` | (`funct7` == `0100000`) ? `ALU_OP_SRA` : `ALU_OP_SRL` |
+| R-type (`or`)           | `001` | `110` | `ALU_OP_OR` |
+| R-type (`and`)          | `001` | `111` | `ALU_OP_AND` |
+| B-type (`beq`, `bne`)   | `010` | `00X` | `ALU_OP_SUB` |
+| B-type (`blt`, `bge`)   | `010` | `10X` | `ALU_OP_SLT` |
+| B-type (`bltu`, `bgeu`) | `010` | `11X` | `ALU_OP_SLTU` |
+| I-type (`addi`)         | `011` | `000` | `ALU_OP_ADD` |
+| I-type (`slli`)         | `011` | `001` | `ALU_OP_SLL` |
+| I-type (`slti`)         | `011` | `010` | `ALU_OP_SLT` |
+| I-type (`sltui`)        | `011` | `011` | `ALU_OP_SLTU` |
+| I-type (`xori`)         | `011` | `100` | `ALU_OP_XOR` |
+| I-type (`srli`, `srai`) | `011` | `101` | (`funct7` == `0100000`) ? `ALU_OP_SRA` : `ALU_OP_SRL` |
+| I-type (`ori`)          | `011` | `110` | `ALU_OP_OR` |
+| I-type (`andi`)         | `011` | `111` | `ALU_OP_AND` |
+| U-type (`lui`)          | `100` | `xxx` | `ALU_OP_PASS_B` |
+| U-type (`auipc`)        | `101` | `xxx` | `ALU_OP_ADD` |
+| J-type (`jal`, `jalr`)  | `110` | `xxx` | `ALU_OP_ADD` |
+| SYSTEM (`ebreak`, `ecall`) | `111` | `xxx` | `ALU_OP_PASS_B` |
 
 ---
 
