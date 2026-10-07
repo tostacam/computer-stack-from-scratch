@@ -98,6 +98,14 @@ These control signals
 
 ### 5.2 Immediate Control Unit (Truth Table)
 
+| Type | `opcode` | `immediate` |
+|:-----|:--------:|:--------:|
+| I-type | `0000011`, `0010011`, `1100111` | sign = `instruction[31]`; `immediate[11:0] = instruction[31:20]` |
+| S-type | `0100011` | sign = `instruction[31]`; `immediate[11:5] = instruction[31:25]`; `immediate[4:0] = instruction[11:7]` |
+| B-type | `1100011` | sign = `instruction[31]`; `immediate[12] = instruction[31]`; `immediate[11] = instruction[7]`; `immediate[10:5] = instruction[30:25]`; `immediate[4:1] = instruction[11:8]`; `immediate[0] = 0` |
+| U-type | `0110111`, `0010111` | sign = `instruction[31]`; `immediate[31:12] = instruction[31:12]`; `immediate[11:0] = 0` |
+| J-type | `1101111` | sign = `instruction[31]`; `immediate[20] = instruction[31]`; `immediate[19:12] = instruction[19:12]`; `immediate[11] = instruction[20]`; `immediate[10:1] = instruction[30:21]`; `immediate[0] = 0` |
+
 ---
 
 ### 5.3 ALU Control Unit (Truth Table)
