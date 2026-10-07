@@ -37,7 +37,19 @@ Single-cycle execution:
 list of instructions
 
 - R-type
+  - `add`, `sub`, `sll`, `slt`, `sltu`, `xor`, `srl`, `sra`, `or`, `and`
 - I-type
+  - `addi`, `slti`, `sltiu`, `xori`, `ori`, `andi`, `slli`, `srli`, `srai`
+- S-type
+  - `lb`, `lh`, `lw`, `lbu`, `lhu`, `sb`, `sh`, `sw`
+- B-type
+  - `beq`, `bne`, `blt`, `bge`, `bltu`, `bgeu`
+- U-type
+  - `lui`, `auipc`
+- J-type
+  - `jal`, `jalr`
+- System
+  - `ecall`, `ebreak`
 
 ---
 
