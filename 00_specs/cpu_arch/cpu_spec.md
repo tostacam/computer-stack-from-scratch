@@ -1,20 +1,22 @@
-# CPU Architecture Spec (C - RTL Contract)
+# CPU Architecture Spec
 
-Establishing the shared execution contract between the C CPU sim (SW model) and the Verilog RTL (HW model).
+Creating this document as the main reference for the CPU implementation, this should outline the supported instructions, expected behavior, and control signals. This should be the source of truth from which the C & RTL are derived.
 
-- C model = reference CPU behavior
-- RTL model = hardware implementation
-- This spec ensures both stay aligned instruction-by-instruction
+> *note: since the RTL will be the final hardware implementation, there's a slight chance this spec may become outdated.
+
+## 0. CPU Datapath (single cycle)
+
+<img src="datapath_single_cycle.png" alt="CPU datapath diagram" width="100%">
 
 ---
 
 ## 1. Architectural State
 
-Both models must expose the same CPU state:
+High level expected CPU state is inspired by RISC-V. It's based on the [RV32I base instruction set](http://five-embeddev.com/riscv-user-isa-manual/Priv-v1.12/instr-table.html) + expanded to 64-bit on the registers' size.
 
-- 32 × 64-bit general purpose registers (`x0` hardwired to 0, RISC-V)
+- 32 × 64-bit general purpose registers (`x0` hardwired to 0)
 - 64-bit program counter (`pc`)
-- Main memory (byte-addressed, size defined per implementation)
+- Main memory (byte-addressed, look at soc_spec for memory details)
 
 ---
 
@@ -22,17 +24,24 @@ Both models must expose the same CPU state:
 
 Single-cycle execution:
 
-1. Fetch instruction
-2. Decode
-3. Execute ALU / memory operation
-4. Writeback
-5. Update PC
-
-Each instruction produces exactly one architectural state update.
+1. Instruction Fetch
+3. Instruction Decode
+4. Execute
+5. Memory Access
+6. Write Back
 
 ---
 
-## 3. ALU Contract
+## 3. Supported Instructions
+
+list of instructions
+
+- R-type
+- I-type
+
+---
+
+## 4. ALU Spec
 
 | ALU Opcode | Behavior | Used By |
 |:----------:|----------|---------|
@@ -47,3 +56,64 @@ Each instruction produces exactly one architectural state update.
 | `ALU_OP_SLT` | `result = ((int64_t)a < (int64_t)b) ? 1 : 0` | `slt`, `slti`, `blt`, `bge` |
 | `ALU_OP_SLTU` | `result = (a < b) ? 1 : 0` | `sltu`, `sltiu`, `bltu`, `bgeu` |
 | `ALU_OP_PASS_B` | `result = b` | `lui` |
+
+---
+
+## 5. Control Signals
+
+These control signals
+
+- alu_src_a
+- alu_src_b
+- wb_src
+- reg_write
+- mem_read
+- mem_write
+- pc_src
+- alu_op
+
+### 5.1 Control Unit
+
+| Type | `alu_src_a` | `alu_src_b` | `wb_src` | `reg_write` | `mem_read` | `mem_write` | `pc_src` | `alu_op` |
+|:----:|:------:|:--------:|:--------:|:-------:|:--------:|:------:|:-----:|:-------------:|
+| R-type         | 0 | 0 | `00` | 1 | 0 | 0 | `00` | `001` |
+| I-type         | 0 | 1 | `00` | 1 | 0 | 0 | `00` | `011` |
+| S-type (LOAD)  | 0 | 1 | `01` | 1 | 1 | 0 | `00` | `000` |
+| S-type (STORE) | 0 | 1 | `01` | 0 | 0 | 1 | `00` | `000` |
+| B-type         | 0 | 0 | `00` | 0 | 0 | 0 | `01` | `010` |
+| U-type (LUI)   | 1 | 1 | `00` | 1 | 0 | 0 | `00` | `100` |
+| U-type (AUIPC) | 1 | 1 | `00` | 1 | 0 | 0 | `00` | `101` |
+| J-type (JAL)   | 0 | 0 | `10` | 1 | 0 | 0 | `10` | `110` |
+| J-type (JALR)  | 0 | 1 | `10` | 1 | 0 | 0 | `11` | `110` |
+| SYSTEM         | 0 | 1 | `00` | 0 | 0 | 0 | `00` | `111` |
+
+---
+
+### 5.2 Immediate Control Unit
+
+---
+
+### 5.3 ALU Control Unit
+
+| ALUOp | Meaning |
+|:-----:|---------|
+| 00 | Add (address calculation) |
+| 01 | Subtract / Compare (branches) |
+| 10 | Decode funct3/funct7 |
+| 11 | Reserved |
+
+---
+
+### 5.4 Branch Control Unit
+
+---
+
+### 5.5 PC Update
+
+| Branch | Zero | Next PC |
+|:------:|:----:|---------|
+| 0 | X | PC + 4 |
+| 1 | 0 | PC + 4 |
+| 1 | 1 | Branch Target |
+
+# Single-Cycle CPU Control Signals
