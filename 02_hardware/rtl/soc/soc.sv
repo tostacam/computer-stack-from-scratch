@@ -1,4 +1,5 @@
 `include "mem_params.svh"
+`include "soc_memory_map.svh"
 
 module soc(
   input  logic clk,
@@ -67,7 +68,7 @@ ram u_ram(
   .word_size(u_cpu.word_size),
   .wr_enable(mem_write && ram_select),
   .rd_enable(mem_read && ram_select),
-  .address(data_address - 64 'h00010000),
+  .address(data_address - `RAM_BASE_ADDR),
   .wr_data(data_write),
   .rd_data(ram_read_data)
 );
@@ -89,11 +90,11 @@ always_comb begin
   gpio_select = 0;
   uart_select = 0;
 
-  if (data_address >= 64'h00010000 && data_address < 64'h00020000)
+  if (data_address >= `RAM_BASE_ADDR && data_address < `RAM_END_ADDR)
     ram_select = 1;
-  else if (data_address == 64'h20000000)
+  else if (data_address == `GPIO_BASE_ADDR)
     gpio_select = 1;
-  else if (data_address == 64'h20000010)
+  else if (data_address == `UART_BASE_ADDR)
     uart_select = 1;
 end 
 
