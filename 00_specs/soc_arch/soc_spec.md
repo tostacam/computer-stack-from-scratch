@@ -38,3 +38,7 @@ The system uses a simple memory-mapped architecture where all peripherals are ac
 - Boot execution begins at **`0x00000000`**.
 - Peripherals are **memory-mapped**, meaning they are accessed with normal `lw`/`sw` instructions.
 - Additional devices (timers, interrupts, SPI, etc.) can be added later.
+
+## 3. Program's Address Space
+
+<img src="program_address_space.png" alt="Program Address Space" width="30%">
